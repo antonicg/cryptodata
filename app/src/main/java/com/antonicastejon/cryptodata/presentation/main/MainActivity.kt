@@ -1,7 +1,8 @@
-package com.antonicastejon.cryptodata
+package com.antonicastejon.cryptodata.presentation.main
 
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
+import com.antonicastejon.cryptodata.R
 
 class MainActivity : AppCompatActivity() {
 
