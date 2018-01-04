@@ -16,6 +16,7 @@ import javax.inject.Singleton
         ApplicationModule::class,
         AndroidSupportInjectionModule::class,
         DaggerViewModelInjectionModule::class,
+        NetModule::class,
         RepositoryModule::class,
         UseCasesModule::class,
         ViewModelModule::class,

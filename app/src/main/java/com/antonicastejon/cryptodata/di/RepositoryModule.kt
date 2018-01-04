@@ -1,5 +1,6 @@
 package com.antonicastejon.cryptodata.di
 
+import com.antonicastejon.cryptodata.model.CoinMarketCapApi
 import com.antonicastejon.cryptodata.model.CoinMarketCapDownloader
 import com.antonicastejon.cryptodata.model.CoinMarketCapRepository
 import dagger.Module
@@ -14,7 +15,7 @@ class RepositoryModule {
 
     @Provides
     @Singleton
-    fun providesCoinMarketCapRepository(): CoinMarketCapRepository = CoinMarketCapDownloader()
+    fun providesCoinMarketCapRepository(coinMarketCapApi: CoinMarketCapApi): CoinMarketCapRepository = CoinMarketCapDownloader(coinMarketCapApi)
 
 
 }

@@ -1,14 +1,12 @@
 package com.antonicastejon.cryptodata.model
 
-import io.reactivex.Flowable
+import io.reactivex.Observable
 
 /**
  * Created by Antoni Castejón on 31/12/2017.
  */
-class CoinMarketCapDownloader() : CoinMarketCapRepository {
+class CoinMarketCapDownloader(private val coinMarketCapApi: CoinMarketCapApi) : CoinMarketCapRepository {
 
-    override fun getCryptoList(page: Int, limit: Int): Flowable<List<Crypto>> {
-        // TODO implement
-        return Flowable.just(listOf(Crypto("BTC"), Crypto("ETH"), Crypto("LTC")))
-    }
+    override fun getCryptoList(page: Int, limit: Int): Observable<List<Crypto>> = coinMarketCapApi.getCryptoList(page, limit)
+
 }
