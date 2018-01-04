@@ -2,6 +2,8 @@ package com.antonicastejon.cryptodata.presentation.main.crypto_list
 
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
+import android.util.Log
+import com.antonicastejon.cryptodata.domain.CryptoListUseCases
 import javax.inject.Inject
 
 /**
@@ -9,7 +11,7 @@ import javax.inject.Inject
  */
 
 class CryptoListViewModel
-@Inject constructor(/*private val cryptoListInteractor: CryptoListInteractor*/) : ViewModel() {
+@Inject constructor(private val cryptoListUseCases: CryptoListUseCases) : ViewModel() {
 
     var page = 1
 
@@ -19,7 +21,7 @@ class CryptoListViewModel
 
     fun getCryptoList() {
         // TODO
-//        cryptoListInteractor.getCryptoListBy(page)
-//                .subscribe()
+        cryptoListUseCases.getCryptoListBy(page)
+                .subscribe{ list -> Log.d("test", "${list.size}") }
     }
 }

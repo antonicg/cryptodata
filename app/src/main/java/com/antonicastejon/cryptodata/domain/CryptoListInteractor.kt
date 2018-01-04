@@ -1,36 +1,18 @@
 package com.antonicastejon.cryptodata.domain
 
-import android.os.Parcel
-import android.os.Parcelable
+import com.antonicastejon.cryptodata.model.CoinMarketCapRepository
 import io.reactivex.Flowable
 
 /**
  * Created by Antoni Castejón on 31/12/2017.
  */
-interface CryptoListInteractor {
-    fun getCryptoListBy(page: Int) : Flowable<List<CryptoViewModel>>
-}
 
+private const val LITMIT_CRYPTO_LIST = 20
 
-data class CryptoViewModel(val name: String) : Parcelable {
-    constructor(parcel: Parcel) : this(parcel.readString()) {
-    }
+class CryptoListInteractor(private val coinMarketCapRepository: CoinMarketCapRepository) : CryptoListUseCases {
 
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeString(name)
-    }
-
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    companion object CREATOR : Parcelable.Creator<CryptoViewModel> {
-        override fun createFromParcel(parcel: Parcel): CryptoViewModel {
-            return CryptoViewModel(parcel)
-        }
-
-        override fun newArray(size: Int): Array<CryptoViewModel?> {
-            return arrayOfNulls(size)
-        }
+    override fun getCryptoListBy(page: Int): Flowable<List<CryptoViewModel>> {
+        return coinMarketCapRepository.getCryptoList(page, LITMIT_CRYPTO_LIST)
+                .map { cryptos -> cryptos.map { CryptoViewModel(it.name) } }
     }
 }

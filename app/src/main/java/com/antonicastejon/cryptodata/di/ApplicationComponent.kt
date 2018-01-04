@@ -13,8 +13,11 @@ import javax.inject.Singleton
 
 @Singleton
 @Component(modules = arrayOf(
+        ApplicationModule::class,
         AndroidSupportInjectionModule::class,
         DaggerViewModelInjectionModule::class,
+        RepositoryModule::class,
+        UseCasesModule::class,
         ViewModelModule::class,
         MainActivityModule::class
         ))
