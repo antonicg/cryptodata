@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">CryptoData</string>
+
+    <string name="price_btc">%1$f BTC</string>
+    <string name="price_usd">%1$f USD</string>
+    <string name="change_24h">24h %1$f</string>
 </resources>

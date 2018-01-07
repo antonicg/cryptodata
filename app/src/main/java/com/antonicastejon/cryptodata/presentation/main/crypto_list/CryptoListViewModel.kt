@@ -1,9 +1,11 @@
 package com.antonicastejon.cryptodata.presentation.main.crypto_list
 
+import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModel
-import android.util.Log
 import com.antonicastejon.cryptodata.domain.CryptoListUseCases
+import com.antonicastejon.cryptodata.domain.CryptoViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
@@ -19,8 +21,12 @@ class CryptoListViewModel
 
     var page = 0
 
-    val cryptoList: MutableLiveData<List<CryptoListViewModel>> by lazy {
-        MutableLiveData<List<CryptoListViewModel>>()
+    val cryptoList: MutableLiveData<List<CryptoViewModel>> by lazy {
+        MutableLiveData<List<CryptoViewModel>>()
+    }
+
+    fun observe(owner: LifecycleOwner, observer: Observer<List<CryptoViewModel>>) {
+        cryptoList.observe(owner, observer)
     }
 
     fun getCryptoList() {
@@ -28,11 +34,9 @@ class CryptoListViewModel
         cryptoListUseCases.getCryptoListBy(page)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({
-                    list -> list.forEach { Log.d(TAG, it.toString()) }
-                },
-                        {
-                            error -> error.printStackTrace()
-                        })
+                .subscribe(
+                        { list -> cryptoList.value = list },
+                        { error -> error.printStackTrace() }
+                )
     }
 }
