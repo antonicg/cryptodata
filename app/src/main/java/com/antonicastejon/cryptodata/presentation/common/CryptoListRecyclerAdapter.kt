@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import com.antonicastejon.cryptodata.R
 import com.antonicastejon.cryptodata.common.formatTo
 import com.antonicastejon.cryptodata.domain.CryptoViewModel
+import com.antonicastejon.cryptodata.presentation.widgets.paginatedRecyclerView.PaginationAdapter
 import kotlinx.android.synthetic.main.crypto_list_item.view.*
 
 /**
@@ -18,24 +19,26 @@ private const val DECIMALS_FIAT = 4
 private const val DECIMALS_BTC = 7
 private const val DECIMALS_CHANGE = 2
 
-class CryptoListRecyclerAdapter : RecyclerView.Adapter<CryptoViewHolder>() {
+class CryptoListRecyclerAdapter : PaginationAdapter<CryptoViewModel>() {
 
-    private val data = mutableListOf<CryptoViewModel>()
-
-    override fun onBindViewHolder(holder: CryptoViewHolder, position: Int) {
-        holder.bind(data[position])
+    override fun onBindItemViewHolder(holder: RecyclerView.ViewHolder?, position: Int) {
+        if (holder is CryptoViewHolder) holder.bind(dataList[position])
     }
 
-    override fun getItemCount(): Int = data.size
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CryptoViewHolder {
+    override fun onCreateItemViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.crypto_list_item, parent, false)
         return CryptoViewHolder(view)
     }
 
+    fun addData(newData: List<CryptoViewModel>) {
+        val fromIndex = dataList.size-1
+        dataList.addAll(newData)
+        notifyItemRangeInserted(fromIndex, newData.size)
+    }
+
     fun updateData(newData: List<CryptoViewModel>) {
-        data.clear()
-        data.addAll(newData)
+        dataList.clear()
+        dataList.addAll(newData)
         notifyDataSetChanged()
     }
 }
