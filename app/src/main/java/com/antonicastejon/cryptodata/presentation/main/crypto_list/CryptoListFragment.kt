@@ -26,22 +26,19 @@ private val TAG = CryptoListFragment::class.java.name
 
 fun newCryptoListFragment() = CryptoListFragment()
 
-class CryptoListFragment: Fragment() {
+class CryptoListFragment : Fragment() {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
 
-    lateinit var viewModel:CryptoListViewModel
+    lateinit var viewModel: CryptoListViewModel
 
     val adapter by lazy { CryptoListRecyclerAdapter() }
+    var isLoading = false
 
     override fun onAttach(context: Context?) {
         AndroidSupportInjection.inject(this)
         super.onAttach(context)
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -50,9 +47,31 @@ class CryptoListFragment: Fragment() {
         initializeRecyclerView()
 
         viewModel = ViewModelProviders.of(this, viewModelFactory).get(CryptoListViewModel::class.java)
-        viewModel.observe(this,  Observer { cryptolist -> cryptolist?.let {
-            adapter.updateData(cryptolist) } } )
-        viewModel.getCryptoList()
+        observeViewModel()
+        viewModel.getCryptoList(0)
+    }
+
+    private fun observeViewModel() {
+        viewModel.observeData(this, Observer { cryptolist ->
+            cryptolist?.let {
+                adapter.updateData(cryptolist)
+            }
+        })
+        viewModel.observeState(this, Observer { state ->
+            state?.let {
+                isLoading = it.state == LOADING || it.state == PAGINATING
+                when (it.state) {
+                    DEFAULT -> swipeRefreshLayout.isRefreshing = false
+                    LOADING -> swipeRefreshLayout.isRefreshing = true
+                    PAGINATING -> {
+                    }
+                    ERROR_API -> {
+                    }
+                    ERROR_NO_INTERNET -> {
+                    }
+                }
+            }
+        })
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -62,11 +81,12 @@ class CryptoListFragment: Fragment() {
     }
 
     private fun initializeRecyclerView() {
-        recyclerView.layoutManager = LinearLayoutManager(context)
+        val layoutManager = LinearLayoutManager(context)
+        recyclerView.layoutManager = layoutManager
         recyclerView.adapter = this.adapter
     }
 
-    private fun initializeToolbar(view:View) {
+    private fun initializeToolbar(view: View) {
         view.toolbar.title = getString(R.string.app_name)
     }
 }

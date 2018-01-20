@@ -19,24 +19,33 @@ private val TAG = CryptoListViewModel::class.java.name
 class CryptoListViewModel
 @Inject constructor(private val cryptoListUseCases: CryptoListUseCases) : ViewModel() {
 
-    var page = 0
+    val state =  MutableLiveData<CryptoListState>()
+    val cryptoList by lazy { MutableLiveData<List<CryptoViewModel>>()}
 
-    val cryptoList: MutableLiveData<List<CryptoViewModel>> by lazy {
-        MutableLiveData<List<CryptoViewModel>>()
+    init {
+        state.value = CryptoListState(DEFAULT)
     }
 
-    fun observe(owner: LifecycleOwner, observer: Observer<List<CryptoViewModel>>) {
-        cryptoList.observe(owner, observer)
-    }
+    fun observeData(owner: LifecycleOwner, observer: Observer<List<CryptoViewModel>>) = cryptoList.observe(owner, observer)
+    fun observeState(owner: LifecycleOwner, observer: Observer<CryptoListState>) = state.observe(owner, observer)
 
-    fun getCryptoList() {
-        // TODO
+    fun getCryptoList(page:Int) {
+        if (page == 0) state.value = CryptoListState(LOADING)
+        else state.value = CryptoListState(PAGINATING)
+
         cryptoListUseCases.getCryptoListBy(page)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        { list -> cryptoList.value = list },
-                        { error -> error.printStackTrace() }
-                )
+                .subscribe(this::onCryptoListReceived, this::onError)
+    }
+
+    fun onCryptoListReceived(cryptoList: List<CryptoViewModel>) {
+        state.value = CryptoListState(DEFAULT)
+        this.cryptoList.value = cryptoList
+    }
+
+    fun onError(error: Throwable) {
+        state.value = CryptoListState(ERROR_API)
+        error.printStackTrace()
     }
 }
