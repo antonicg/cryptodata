@@ -8,12 +8,12 @@ import io.reactivex.Observable
  * Created by Antoni Castejón on 31/12/2017.
  */
 
-private const val LITMIT_CRYPTO_LIST = 20
+const val LIMIT_CRYPTO_LIST = 20
 
 class CryptoListInteractor(private val coinMarketCapRepository: CoinMarketCapRepository) : CryptoListUseCases {
 
     override fun getCryptoListBy(page: Int): Observable<List<CryptoViewModel>> {
-        return coinMarketCapRepository.getCryptoList(page, LITMIT_CRYPTO_LIST)
+        return coinMarketCapRepository.getCryptoList(page, LIMIT_CRYPTO_LIST)
                 .map { cryptos -> cryptos.map(cryptoViewModelMapper) }
     }
 

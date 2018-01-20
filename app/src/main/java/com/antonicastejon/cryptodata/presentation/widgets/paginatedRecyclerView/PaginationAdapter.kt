@@ -38,6 +38,22 @@ abstract class PaginationAdapter<D> : RecyclerView.Adapter<RecyclerView.ViewHold
 
     override fun getItemViewType(position: Int) =
             if (position == dataList.size -1 && isLoadingViewAdded) LOADING_VIEW_TYPE else ITEM_VIEW_TYPE
+
+    fun addLoadingViewFooter(emptyDataObject: D) {
+        if (dataList.size > 0) {
+            isLoadingViewAdded = true
+            dataList.add(emptyDataObject)
+            notifyItemInserted(dataList.size - 1)
+        }
+    }
+
+    fun removeLoadingViewFooter() {
+        if (isLoadingViewAdded && dataList.size > 0) {
+            isLoadingViewAdded = false
+            dataList.removeAt(dataList.size-1)
+            notifyItemRemoved(dataList.size)
+        }
+    }
 }
 
 class LoadingViewHolder(itemView: View): RecyclerView.ViewHolder(itemView)

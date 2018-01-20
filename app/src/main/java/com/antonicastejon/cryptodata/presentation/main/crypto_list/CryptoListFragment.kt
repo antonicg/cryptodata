@@ -11,7 +11,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.antonicastejon.cryptodata.R
+import com.antonicastejon.cryptodata.domain.LIMIT_CRYPTO_LIST
+import com.antonicastejon.cryptodata.domain.emptyCryptoViewModel
 import com.antonicastejon.cryptodata.presentation.common.CryptoListRecyclerAdapter
+import com.antonicastejon.cryptodata.presentation.widgets.paginatedRecyclerView.PaginationScrollListener
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.crypto_list_fragment.*
 import kotlinx.android.synthetic.main.crypto_list_fragment.view.*
@@ -35,6 +38,7 @@ class CryptoListFragment : Fragment() {
 
     val adapter by lazy { CryptoListRecyclerAdapter() }
     var isLoading = false
+    var isLastPage = false
 
     override fun onAttach(context: Context?) {
         AndroidSupportInjection.inject(this)
@@ -48,7 +52,7 @@ class CryptoListFragment : Fragment() {
 
         viewModel = ViewModelProviders.of(this, viewModelFactory).get(CryptoListViewModel::class.java)
         observeViewModel()
-        viewModel.getCryptoList(0)
+        viewModel.refreshList()
     }
 
     private fun observeViewModel() {
@@ -57,17 +61,27 @@ class CryptoListFragment : Fragment() {
                 adapter.updateData(cryptolist)
             }
         })
+        viewModel.observeLastPage(this, Observer { isLastPage -> this.isLastPage = isLastPage ?: false })
         viewModel.observeState(this, Observer { state ->
             state?.let {
-                isLoading = it.state == LOADING || it.state == PAGINATING
                 when (it.state) {
-                    DEFAULT -> swipeRefreshLayout.isRefreshing = false
-                    LOADING -> swipeRefreshLayout.isRefreshing = true
+                    DEFAULT -> {
+                        isLoading = false
+                        swipeRefreshLayout.isRefreshing = false
+                        adapter.removeLoadingViewFooter()
+                    }
+                    LOADING -> {
+                        swipeRefreshLayout.isRefreshing = true
+                        isLoading = true
+                    }
                     PAGINATING -> {
+                        isLoading = true
                     }
                     ERROR_API -> {
+                        isLoading = false
                     }
                     ERROR_NO_INTERNET -> {
+                        isLoading = false
                     }
                 }
             }
@@ -84,9 +98,23 @@ class CryptoListFragment : Fragment() {
         val layoutManager = LinearLayoutManager(context)
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = this.adapter
+        recyclerView.addOnScrollListener(OnScrollListener(layoutManager))
     }
 
     private fun initializeToolbar(view: View) {
         view.toolbar.title = getString(R.string.app_name)
+    }
+
+    private fun loadNextPage() {
+        adapter.addLoadingViewFooter(emptyCryptoViewModel)
+        viewModel.loadNextPage()
+    }
+
+
+    inner class OnScrollListener(layoutManager: LinearLayoutManager) : PaginationScrollListener(layoutManager) {
+        override fun isLoading() = isLoading
+        override fun loadMoreItems() = loadNextPage()
+        override fun getTotalPageCount() = LIMIT_CRYPTO_LIST
+        override fun isLastPage() = isLastPage
     }
 }

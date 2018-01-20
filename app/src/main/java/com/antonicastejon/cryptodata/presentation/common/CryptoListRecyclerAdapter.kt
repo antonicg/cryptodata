@@ -30,16 +30,10 @@ class CryptoListRecyclerAdapter : PaginationAdapter<CryptoViewModel>() {
         return CryptoViewHolder(view)
     }
 
-    fun addData(newData: List<CryptoViewModel>) {
-        val fromIndex = dataList.size-1
+    fun updateData(newData: List<CryptoViewModel>) {
+        val fromIndex = dataList.size
         dataList.addAll(newData)
         notifyItemRangeInserted(fromIndex, newData.size)
-    }
-
-    fun updateData(newData: List<CryptoViewModel>) {
-        dataList.clear()
-        dataList.addAll(newData)
-        notifyDataSetChanged()
     }
 }
 
@@ -49,6 +43,7 @@ class CryptoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
     fun bind(item: CryptoViewModel) {
         itemView.apply {
+            tvPosition.text = item.rank.toString()
             tvSymbol.text = item.symbol
             tvPrice.text = bindPrice(item)
             tvChange24h.text = bindChangeText(item)

@@ -7,6 +7,6 @@ import io.reactivex.Observable
  */
 class CoinMarketCapDownloader(private val coinMarketCapApi: CoinMarketCapApi) : CoinMarketCapRepository {
 
-    override fun getCryptoList(page: Int, limit: Int): Observable<List<Crypto>> = coinMarketCapApi.getCryptoList(page, limit)
+    override fun getCryptoList(page: Int, limit: Int): Observable<List<Crypto>> = coinMarketCapApi.getCryptoList(page * limit, limit)
 
 }

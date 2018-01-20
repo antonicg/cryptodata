@@ -11,9 +11,12 @@ interface CryptoListUseCases {
     fun getCryptoListBy(page: Int) : Observable<List<CryptoViewModel>>
 }
 
+val emptyCryptoViewModel = CryptoViewModel()
 
 data class CryptoViewModel(val id: String, val name: String, val symbol: String, val rank: Int, val priceFiat: Float, val priceBtc: Float, val change: Float)
     : Parcelable {
+
+    constructor() : this("", "", "", 0, 0f, 0f, 0f)
 
     fun isBtc() = symbol.equals("BTC")
 

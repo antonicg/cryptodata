@@ -10,7 +10,7 @@ import retrofit2.http.Query
  */
 interface CoinMarketCapApi {
     @GET("v1/ticker/")
-    fun getCryptoList(@Query("start" )page:Int, @Query("limit") limit:Int) : Observable<List<Crypto>>
+    fun getCryptoList(@Query("start" )start:Int, @Query("limit") limit:Int) : Observable<List<Crypto>>
 }
 
 
