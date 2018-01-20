@@ -14,6 +14,9 @@ interface CryptoListUseCases {
 
 data class CryptoViewModel(val id: String, val name: String, val symbol: String, val rank: Int, val priceFiat: Float, val priceBtc: Float, val change: Float)
     : Parcelable {
+
+    fun isBtc() = symbol.equals("BTC")
+
     constructor(parcel: Parcel) : this(
             parcel.readString(),
             parcel.readString(),

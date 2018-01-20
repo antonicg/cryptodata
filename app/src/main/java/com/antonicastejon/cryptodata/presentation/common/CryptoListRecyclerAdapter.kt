@@ -1,19 +1,26 @@
 package com.antonicastejon.cryptodata.presentation.common
 
+import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.antonicastejon.cryptodata.R
+import com.antonicastejon.cryptodata.common.formatTo
 import com.antonicastejon.cryptodata.domain.CryptoViewModel
 import kotlinx.android.synthetic.main.crypto_list_item.view.*
 
 /**
  * Created by Antoni Castejón on 07/01/2018.
  */
-class CryptoListRecyclerAdapter : RecyclerView.Adapter<CryptoListRecyclerAdapter.CryptoViewHolder>()  {
 
-    private val data = ArrayList<CryptoViewModel>()
+private const val DECIMALS_FIAT = 4
+private const val DECIMALS_BTC = 7
+private const val DECIMALS_CHANGE = 2
+
+class CryptoListRecyclerAdapter : RecyclerView.Adapter<CryptoViewHolder>() {
+
+    private val data = mutableListOf<CryptoViewModel>()
 
     override fun onBindViewHolder(holder: CryptoViewHolder, position: Int) {
         holder.bind(data[position])
@@ -31,16 +38,28 @@ class CryptoListRecyclerAdapter : RecyclerView.Adapter<CryptoListRecyclerAdapter
         data.addAll(newData)
         notifyDataSetChanged()
     }
+}
 
-    class CryptoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+class CryptoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-        val resources by lazy { itemView.context.resources }
+    val resources by lazy { itemView.context.resources }
 
-        fun bind(item:CryptoViewModel) {
-            itemView.tvSymbol.text = item.symbol
-            itemView.tvPriceBtc.text = resources.getString(R.string.price_btc, item.priceBtc)
-            itemView.tvPriceFiat.text = resources.getString(R.string.price_usd, item.priceFiat)
-            itemView.tvChange24h.text = resources.getString(R.string.change_24h, item.change)
+    fun bind(item: CryptoViewModel) {
+        itemView.apply {
+            tvSymbol.text = item.symbol
+            tvPrice.text = bindPrice(item)
+            tvChange24h.text = bindChangeText(item)
+            tvChange24h.setTextColor(bindChangeColor(item))
         }
     }
+
+    fun bindPrice(item: CryptoViewModel) =
+            if (item.isBtc()) resources.getString(R.string.price_btc, item.priceFiat.formatTo(DECIMALS_FIAT))
+            else resources.getString(R.string.price_alts, item.priceFiat.formatTo(DECIMALS_FIAT), item.priceBtc.formatTo(DECIMALS_BTC))
+
+    fun bindChangeColor(item: CryptoViewModel) =
+            ContextCompat.getColor(itemView.context, if (item.change > 0) R.color.change_positive else R.color.change_negative)
+
+    fun bindChangeText(item: CryptoViewModel) =
+            resources.getString(R.string.change_percent, item.change.formatTo(DECIMALS_CHANGE))
 }

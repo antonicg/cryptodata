@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.antonicastejon.cryptodata.presentation.main.MainActivity"
-    android:id="@+id/container">
+    android:id="@+id/container"
+    android:background="@android:color/white">
 
 </FrameLayout>

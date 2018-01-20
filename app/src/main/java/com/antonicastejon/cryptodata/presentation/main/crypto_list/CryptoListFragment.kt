@@ -14,6 +14,7 @@ import com.antonicastejon.cryptodata.R
 import com.antonicastejon.cryptodata.presentation.common.CryptoListRecyclerAdapter
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.crypto_list_fragment.*
+import kotlinx.android.synthetic.main.crypto_list_fragment.view.*
 import javax.inject.Inject
 
 /**
@@ -56,11 +57,16 @@ class CryptoListFragment: Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.crypto_list_fragment, container, false)
+        initializeToolbar(view)
         return view
     }
 
     private fun initializeRecyclerView() {
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.adapter = this.adapter
+    }
+
+    private fun initializeToolbar(view:View) {
+        view.toolbar.title = getString(R.string.app_name)
     }
 }
