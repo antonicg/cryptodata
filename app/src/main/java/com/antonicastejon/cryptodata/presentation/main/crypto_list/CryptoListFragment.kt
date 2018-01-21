@@ -52,7 +52,7 @@ class CryptoListFragment : Fragment() {
 
         viewModel = ViewModelProviders.of(this, viewModelFactory).get(CryptoListViewModel::class.java)
         observeViewModel()
-        viewModel.refreshList()
+        viewModel.updateCryptoList()
     }
 
     private fun observeViewModel() {
@@ -61,9 +61,9 @@ class CryptoListFragment : Fragment() {
                 adapter.updateData(cryptolist)
             }
         })
-        viewModel.observeLastPage(this, Observer { isLastPage -> this.isLastPage = isLastPage ?: false })
         viewModel.observeState(this, Observer { state ->
             state?.let {
+                isLastPage = state.loadedAllItems
                 when (it.state) {
                     DEFAULT -> {
                         isLoading = false
@@ -79,9 +79,11 @@ class CryptoListFragment : Fragment() {
                     }
                     ERROR_API -> {
                         isLoading = false
+                        adapter.removeLoadingViewFooter()
                     }
                     ERROR_NO_INTERNET -> {
                         isLoading = false
+                        adapter.removeLoadingViewFooter()
                     }
                 }
             }
@@ -107,7 +109,7 @@ class CryptoListFragment : Fragment() {
 
     private fun loadNextPage() {
         adapter.addLoadingViewFooter(emptyCryptoViewModel)
-        viewModel.loadNextPage()
+        viewModel.updateCryptoList()
     }
 
 

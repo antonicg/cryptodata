@@ -32,7 +32,7 @@ class CryptoListRecyclerAdapter : PaginationAdapter<CryptoViewModel>() {
 
     fun updateData(newData: List<CryptoViewModel>) {
         val fromIndex = dataList.size
-        dataList.addAll(newData)
+        dataList = newData.toMutableList()
         notifyItemRangeInserted(fromIndex, newData.size)
     }
 }

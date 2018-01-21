@@ -19,7 +19,7 @@ abstract class PaginationAdapter<D> : RecyclerView.Adapter<RecyclerView.ViewHold
     abstract fun onBindItemViewHolder(holder: RecyclerView.ViewHolder?, position: Int)
 
     private var isLoadingViewAdded = false
-    protected val dataList = mutableListOf<D>()
+    protected var dataList = mutableListOf<D>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
         when (viewType) {

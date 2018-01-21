@@ -16,4 +16,4 @@ const val ERROR_NO_INTERNET = 4L
 @Retention(AnnotationRetention.SOURCE)
 annotation class STATE
 
-data class CryptoListState(@STATE val state:Long)
+data class CryptoListState(@STATE val state:Long, val pageNum:Int, val loadedAllItems:Boolean)

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
 import com.antonicastejon.cryptodata.R
+import com.antonicastejon.cryptodata.common.addFragment
 import com.antonicastejon.cryptodata.presentation.main.crypto_list.CRYPTO_LIST_FRAGMENT_TAG
 import com.antonicastejon.cryptodata.presentation.main.crypto_list.newCryptoListFragment
 import dagger.android.AndroidInjection
@@ -13,10 +14,11 @@ import dagger.android.support.HasSupportFragmentInjector
 import javax.inject.Inject
 
 
-
 class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
     @Inject
     lateinit var fragmentInjector: DispatchingAndroidInjector<Fragment>
+
+    val cryptoListFragment by lazy { newCryptoListFragment() }
 
     override fun supportFragmentInjector(): AndroidInjector<android.support.v4.app.Fragment> {
         return fragmentInjector
@@ -26,9 +28,6 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        supportFragmentManager.beginTransaction()
-                .add(R.id.container, newCryptoListFragment(), CRYPTO_LIST_FRAGMENT_TAG)
-                .commit()
+        if (savedInstanceState == null) addFragment(R.id.container, cryptoListFragment, CRYPTO_LIST_FRAGMENT_TAG)
     }
 }

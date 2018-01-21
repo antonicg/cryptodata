@@ -20,31 +20,23 @@ private val TAG = CryptoListViewModel::class.java.name
 class CryptoListViewModel
 @Inject constructor(private val cryptoListUseCases: CryptoListUseCases) : ViewModel() {
 
-    val state =  MutableLiveData<CryptoListState>()
-    val cryptoList by lazy { MutableLiveData<List<CryptoViewModel>>()}
-    val isLastPage by lazy { MutableLiveData<Boolean>() }
-
-    var page = 0
+    private val state =  MutableLiveData<CryptoListState>()
+    private val cryptoListLiveData by lazy { MutableLiveData<List<CryptoViewModel>>()}
+    private val cryptoList by lazy { mutableListOf<CryptoViewModel>() }
 
     init {
-        state.value = CryptoListState(DEFAULT)
+        state.value = CryptoListState(DEFAULT, 0, false)
     }
 
-    fun observeData(owner: LifecycleOwner, observer: Observer<List<CryptoViewModel>>) = cryptoList.observe(owner, observer)
+    fun observeData(owner: LifecycleOwner, observer: Observer<List<CryptoViewModel>>) = cryptoListLiveData.observe(owner, observer)
     fun observeState(owner: LifecycleOwner, observer: Observer<CryptoListState>) = state.observe(owner, observer)
-    fun observeLastPage(owner: LifecycleOwner, observer: Observer<Boolean>) = isLastPage.observe(owner, observer)
 
-    fun refreshList() {
-        state.value = CryptoListState(LOADING)
-        page = 0
-        getCryptoList(page)
+    fun updateCryptoList() {
+        val pageNum = state.value?.pageNum ?: 0
+        state.value = CryptoListState(LOADING, pageNum, false)
+        getCryptoList(pageNum)
     }
 
-    fun loadNextPage() {
-        state.value = CryptoListState(PAGINATING)
-        page++
-        getCryptoList(page)
-    }
     private fun getCryptoList(page:Int) {
         cryptoListUseCases.getCryptoListBy(page)
                 .subscribeOn(Schedulers.io())
@@ -53,13 +45,14 @@ class CryptoListViewModel
     }
 
     private fun onCryptoListReceived(cryptoList: List<CryptoViewModel>) {
-        isLastPage.value = cryptoList.size < LIMIT_CRYPTO_LIST
-        state.value = CryptoListState(DEFAULT)
-        this.cryptoList.value = cryptoList
+        state.value = CryptoListState(DEFAULT, (state.value?.pageNum ?: 0) + 1, cryptoList.size < LIMIT_CRYPTO_LIST)
+        this.cryptoList.addAll(cryptoList)
+        this.cryptoListLiveData.value = this.cryptoList
     }
 
     private fun onError(error: Throwable) {
-        state.value = CryptoListState(ERROR_API)
+        val pageNum = state.value?.pageNum ?: 0
+        state.value = CryptoListState(ERROR_API, pageNum, state.value?.loadedAllItems ?: false)
         error.printStackTrace()
     }
 }
