@@ -37,6 +37,13 @@ class CryptoListViewModel
         getCryptoList(pageNum)
     }
 
+    fun resetCryptoList() {
+        val pageNum = 0
+        state.value = CryptoListState(LOADING, pageNum, false)
+        cryptoList.clear()
+        updateCryptoList()
+    }
+
     private fun getCryptoList(page:Int) {
         cryptoListUseCases.getCryptoListBy(page)
                 .subscribeOn(Schedulers.io())

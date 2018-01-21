@@ -36,7 +36,7 @@ class CryptoListFragment : Fragment() {
 
     lateinit var viewModel: CryptoListViewModel
 
-    val adapter by lazy { CryptoListRecyclerAdapter() }
+    val cryptoListAdapter by lazy { CryptoListRecyclerAdapter() }
     var isLoading = false
     var isLastPage = false
 
@@ -48,8 +48,6 @@ class CryptoListFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        initializeRecyclerView()
-
         viewModel = ViewModelProviders.of(this, viewModelFactory).get(CryptoListViewModel::class.java)
         observeViewModel()
         viewModel.updateCryptoList()
@@ -58,7 +56,7 @@ class CryptoListFragment : Fragment() {
     private fun observeViewModel() {
         viewModel.observeData(this, Observer { cryptolist ->
             cryptolist?.let {
-                adapter.updateData(cryptolist)
+                cryptoListAdapter.updateData(cryptolist)
             }
         })
         viewModel.observeState(this, Observer { state ->
@@ -68,7 +66,7 @@ class CryptoListFragment : Fragment() {
                     DEFAULT -> {
                         isLoading = false
                         swipeRefreshLayout.isRefreshing = false
-                        adapter.removeLoadingViewFooter()
+                        cryptoListAdapter.removeLoadingViewFooter()
                     }
                     LOADING -> {
                         swipeRefreshLayout.isRefreshing = true
@@ -79,11 +77,11 @@ class CryptoListFragment : Fragment() {
                     }
                     ERROR_API -> {
                         isLoading = false
-                        adapter.removeLoadingViewFooter()
+                        cryptoListAdapter.removeLoadingViewFooter()
                     }
                     ERROR_NO_INTERNET -> {
                         isLoading = false
-                        adapter.removeLoadingViewFooter()
+                        cryptoListAdapter.removeLoadingViewFooter()
                     }
                 }
             }
@@ -93,22 +91,30 @@ class CryptoListFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.crypto_list_fragment, container, false)
         initializeToolbar(view)
+        initializeRecyclerView(view)
+        initializeSwipeToRefreshView(view)
         return view
     }
 
-    private fun initializeRecyclerView() {
-        val layoutManager = LinearLayoutManager(context)
-        recyclerView.layoutManager = layoutManager
-        recyclerView.adapter = this.adapter
-        recyclerView.addOnScrollListener(OnScrollListener(layoutManager))
-    }
-
-    private fun initializeToolbar(view: View) {
+    private fun initializeToolbar(view:View) {
         view.toolbar.title = getString(R.string.app_name)
     }
 
+    private fun initializeRecyclerView(view:View) {
+        val linearLayoutManager = LinearLayoutManager(context)
+        view.recyclerView.apply {
+            layoutManager = linearLayoutManager
+            adapter = cryptoListAdapter
+            addOnScrollListener(OnScrollListener(linearLayoutManager))
+        }
+    }
+
+    private fun initializeSwipeToRefreshView(view:View) {
+        view.swipeRefreshLayout.setOnRefreshListener { viewModel.resetCryptoList() }
+    }
+
     private fun loadNextPage() {
-        adapter.addLoadingViewFooter(emptyCryptoViewModel)
+        cryptoListAdapter.addLoadingViewFooter(emptyCryptoViewModel)
         viewModel.updateCryptoList()
     }
 
