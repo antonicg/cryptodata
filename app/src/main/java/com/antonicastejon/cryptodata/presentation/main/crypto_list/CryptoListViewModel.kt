@@ -4,12 +4,14 @@ import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModel
+import com.antonicastejon.cryptodata.di.SCHEDULER_IO
+import com.antonicastejon.cryptodata.di.SCHEDULER_MAIN_THREAD
 import com.antonicastejon.cryptodata.domain.CryptoListUseCases
 import com.antonicastejon.cryptodata.domain.CryptoViewModel
 import com.antonicastejon.cryptodata.domain.LIMIT_CRYPTO_LIST
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
+import io.reactivex.Scheduler
 import javax.inject.Inject
+import javax.inject.Named
 
 /**
  * Created by Antoni Castejón on 31/12/2017.
@@ -18,7 +20,7 @@ import javax.inject.Inject
 private val TAG = CryptoListViewModel::class.java.name
 
 class CryptoListViewModel
-@Inject constructor(private val cryptoListUseCases: CryptoListUseCases) : ViewModel() {
+@Inject constructor(private val cryptoListUseCases: CryptoListUseCases, @Named(SCHEDULER_IO) val subscribeOnScheduler:Scheduler, @Named(SCHEDULER_MAIN_THREAD) val observeOnScheduler: Scheduler) : ViewModel() {
 
     private val state =  MutableLiveData<CryptoListState>()
     private val cryptoListLiveData by lazy { MutableLiveData<List<CryptoViewModel>>()}
@@ -46,8 +48,8 @@ class CryptoListViewModel
 
     private fun getCryptoList(page:Int) {
         cryptoListUseCases.getCryptoListBy(page)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(subscribeOnScheduler)
+                .observeOn(observeOnScheduler)
                 .subscribe(this::onCryptoListReceived, this::onError)
     }
 

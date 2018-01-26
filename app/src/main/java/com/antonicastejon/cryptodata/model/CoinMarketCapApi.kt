@@ -1,7 +1,7 @@
 package com.antonicastejon.cryptodata.model
 
 import com.google.gson.annotations.SerializedName
-import io.reactivex.Observable
+import io.reactivex.Single
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -10,7 +10,7 @@ import retrofit2.http.Query
  */
 interface CoinMarketCapApi {
     @GET("v1/ticker/")
-    fun getCryptoList(@Query("start" )start:Int, @Query("limit") limit:Int) : Observable<List<Crypto>>
+    fun getCryptoList(@Query("start" )start:Int, @Query("limit") limit:Int) : Single<List<Crypto>>
 }
 
 
