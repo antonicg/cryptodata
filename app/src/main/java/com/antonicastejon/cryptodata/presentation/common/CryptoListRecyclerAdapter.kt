@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import com.antonicastejon.cryptodata.R
 import com.antonicastejon.cryptodata.common.formatTo
 import com.antonicastejon.cryptodata.domain.CryptoViewModel
+import com.antonicastejon.cryptodata.domain.emptyCryptoViewModel
 import com.antonicastejon.cryptodata.presentation.widgets.paginatedRecyclerView.PaginationAdapter
 import kotlinx.android.synthetic.main.crypto_list_item.view.*
 
@@ -20,6 +21,9 @@ private const val DECIMALS_BTC = 7
 private const val DECIMALS_CHANGE = 2
 
 class CryptoListRecyclerAdapter : PaginationAdapter<CryptoViewModel>() {
+    override fun addLoadingViewFooter() {
+        addLoadingViewFooter(emptyCryptoViewModel)
+    }
 
     override fun onBindItemViewHolder(holder: RecyclerView.ViewHolder?, position: Int) {
         if (holder is CryptoViewHolder) holder.bind(dataList[position])

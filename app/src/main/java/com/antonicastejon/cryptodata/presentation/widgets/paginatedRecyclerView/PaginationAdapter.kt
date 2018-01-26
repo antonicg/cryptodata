@@ -17,7 +17,8 @@ private const val ITEM_VIEW_TYPE = 1
 abstract class PaginationAdapter<D> : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     abstract fun onCreateItemViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder
     abstract fun onBindItemViewHolder(holder: RecyclerView.ViewHolder?, position: Int)
-
+    abstract fun addLoadingViewFooter()
+    
     private var isLoadingViewAdded = false
     protected var dataList = mutableListOf<D>()
 
@@ -39,14 +40,6 @@ abstract class PaginationAdapter<D> : RecyclerView.Adapter<RecyclerView.ViewHold
     override fun getItemViewType(position: Int) =
             if (position == dataList.size -1 && isLoadingViewAdded) LOADING_VIEW_TYPE else ITEM_VIEW_TYPE
 
-    fun addLoadingViewFooter(emptyDataObject: D) {
-        if (dataList.size > 0) {
-            isLoadingViewAdded = true
-            dataList.add(emptyDataObject)
-            notifyItemInserted(dataList.size - 1)
-        }
-    }
-
     fun removeLoadingViewFooter() {
         if (isLoadingViewAdded && dataList.size > 0) {
             isLoadingViewAdded = false
@@ -54,6 +47,15 @@ abstract class PaginationAdapter<D> : RecyclerView.Adapter<RecyclerView.ViewHold
             notifyItemRemoved(dataList.size)
         }
     }
+
+    protected fun addLoadingViewFooter(emptyDataObject: D) {
+        if (dataList.size > 0) {
+            isLoadingViewAdded = true
+            dataList.add(emptyDataObject)
+            notifyItemInserted(dataList.size - 1)
+        }
+    }
+
 }
 
 class LoadingViewHolder(itemView: View): RecyclerView.ViewHolder(itemView)

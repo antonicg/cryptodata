@@ -12,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import com.antonicastejon.cryptodata.R
 import com.antonicastejon.cryptodata.domain.LIMIT_CRYPTO_LIST
-import com.antonicastejon.cryptodata.domain.emptyCryptoViewModel
 import com.antonicastejon.cryptodata.presentation.common.CryptoListRecyclerAdapter
 import com.antonicastejon.cryptodata.presentation.widgets.paginatedRecyclerView.PaginationScrollListener
 import dagger.android.support.AndroidSupportInjection
@@ -114,7 +113,7 @@ class CryptoListFragment : Fragment() {
     }
 
     private fun loadNextPage() {
-        cryptoListAdapter.addLoadingViewFooter(emptyCryptoViewModel)
+        cryptoListAdapter.addLoadingViewFooter()
         viewModel.updateCryptoList()
     }
 
