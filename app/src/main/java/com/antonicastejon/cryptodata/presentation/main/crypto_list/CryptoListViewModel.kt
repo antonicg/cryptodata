@@ -1,8 +1,6 @@
 package com.antonicastejon.cryptodata.presentation.main.crypto_list
 
-import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModel
 import com.antonicastejon.cryptodata.di.SCHEDULER_IO
 import com.antonicastejon.cryptodata.di.SCHEDULER_MAIN_THREAD
@@ -22,27 +20,25 @@ private val TAG = CryptoListViewModel::class.java.name
 class CryptoListViewModel
 @Inject constructor(private val cryptoListUseCases: CryptoListUseCases, @Named(SCHEDULER_IO) val subscribeOnScheduler:Scheduler, @Named(SCHEDULER_MAIN_THREAD) val observeOnScheduler: Scheduler) : ViewModel() {
 
-    private val state =  MutableLiveData<CryptoListState>()
-    private val cryptoListLiveData by lazy { MutableLiveData<List<CryptoViewModel>>()}
-    private val cryptoList by lazy { mutableListOf<CryptoViewModel>() }
+    val stateLiveData =  MutableLiveData<CryptoListState>()
+
+    private val cryptoList = mutableListOf<CryptoViewModel>()
 
     init {
-        state.value = CryptoListState(DEFAULT, 0, false)
+        stateLiveData.value = CryptoListState(DEFAULT, 0, false, cryptoList)
     }
 
-    fun observeData(owner: LifecycleOwner, observer: Observer<List<CryptoViewModel>>) = cryptoListLiveData.observe(owner, observer)
-    fun observeState(owner: LifecycleOwner, observer: Observer<CryptoListState>) = state.observe(owner, observer)
-
     fun updateCryptoList() {
-        val pageNum = state.value?.pageNum ?: 0
-        state.value = CryptoListState(LOADING, pageNum, false)
+        val pageNum = stateLiveData.value?.pageNum ?: 0
+        val state = if (pageNum == 0) LOADING else PAGINATING
+        stateLiveData.value = CryptoListState(state, pageNum, false, this.cryptoList)
         getCryptoList(pageNum)
     }
 
     fun resetCryptoList() {
         val pageNum = 0
-        state.value = CryptoListState(LOADING, pageNum, false)
         cryptoList.clear()
+        stateLiveData.value = CryptoListState(LOADING, pageNum, false, cryptoList)
         updateCryptoList()
     }
 
@@ -54,14 +50,13 @@ class CryptoListViewModel
     }
 
     private fun onCryptoListReceived(cryptoList: List<CryptoViewModel>) {
-        state.value = CryptoListState(DEFAULT, (state.value?.pageNum ?: 0) + 1, cryptoList.size < LIMIT_CRYPTO_LIST)
         this.cryptoList.addAll(cryptoList)
-        this.cryptoListLiveData.value = this.cryptoList
+        stateLiveData.value = CryptoListState(DEFAULT, (stateLiveData.value?.pageNum ?: 0) + 1, cryptoList.size < LIMIT_CRYPTO_LIST, this.cryptoList)
     }
 
     private fun onError(error: Throwable) {
-        val pageNum = state.value?.pageNum ?: 0
-        state.value = CryptoListState(ERROR_API, pageNum, state.value?.loadedAllItems ?: false)
+        val pageNum = stateLiveData.value?.pageNum ?: 0
+        stateLiveData.value = CryptoListState(ERROR_API, pageNum, stateLiveData.value?.loadedAllItems ?: false, this.cryptoList)
         error.printStackTrace()
     }
 }

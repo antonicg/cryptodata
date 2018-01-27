@@ -1,6 +1,7 @@
 package com.antonicastejon.cryptodata.presentation.main.crypto_list
 
 import android.support.annotation.IntDef
+import com.antonicastejon.cryptodata.domain.CryptoViewModel
 
 /**
  * Created by Antoni Castejón
@@ -16,4 +17,4 @@ const val ERROR_NO_INTERNET = 4L
 @Retention(AnnotationRetention.SOURCE)
 annotation class STATE
 
-data class CryptoListState(@STATE val state:Long, val pageNum:Int, val loadedAllItems:Boolean)
+data class CryptoListState(@STATE val state:Long, val pageNum:Int, val loadedAllItems:Boolean, val data: List<CryptoViewModel>)

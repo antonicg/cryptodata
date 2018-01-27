@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
 import com.antonicastejon.cryptodata.R
-import com.antonicastejon.cryptodata.common.addFragment
+import com.antonicastejon.cryptodata.common.replaceFragment
 import com.antonicastejon.cryptodata.presentation.main.crypto_list.CRYPTO_LIST_FRAGMENT_TAG
 import com.antonicastejon.cryptodata.presentation.main.crypto_list.newCryptoListFragment
 import dagger.android.AndroidInjection
@@ -28,6 +28,6 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        if (savedInstanceState == null) addFragment(R.id.container, cryptoListFragment, CRYPTO_LIST_FRAGMENT_TAG)
+        if (savedInstanceState == null) replaceFragment(R.id.container, cryptoListFragment, CRYPTO_LIST_FRAGMENT_TAG)
     }
 }

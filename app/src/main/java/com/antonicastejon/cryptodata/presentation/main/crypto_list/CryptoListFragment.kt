@@ -33,58 +33,59 @@ class CryptoListFragment : Fragment() {
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
 
-    lateinit var viewModel: CryptoListViewModel
+    private lateinit var viewModel: CryptoListViewModel
 
-    val cryptoListAdapter by lazy { CryptoListRecyclerAdapter() }
-    var isLoading = false
-    var isLastPage = false
+    private val cryptoListAdapter by lazy { CryptoListRecyclerAdapter() }
+    private var isLoading = false
+    private var isLastPage = false
+
+    private val stateObserver = Observer<CryptoListState> { state ->
+        state?.let {
+            isLastPage = state.loadedAllItems
+            when (it.state) {
+                DEFAULT -> {
+                    isLoading = false
+                    swipeRefreshLayout.isRefreshing = false
+                    cryptoListAdapter.updateData(it.data)
+                }
+                LOADING -> {
+                    swipeRefreshLayout.isRefreshing = true
+                    isLoading = true
+                }
+                PAGINATING -> {
+                    isLoading = true
+                }
+                ERROR_API -> {
+                    isLoading = false
+                    cryptoListAdapter.removeLoadingViewFooter()
+                }
+                ERROR_NO_INTERNET -> {
+                    isLoading = false
+                    cryptoListAdapter.removeLoadingViewFooter()
+                }
+            }
+        }
+    }
 
     override fun onAttach(context: Context?) {
         AndroidSupportInjection.inject(this)
         super.onAttach(context)
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         viewModel = ViewModelProviders.of(this, viewModelFactory).get(CryptoListViewModel::class.java)
         observeViewModel()
         viewModel.updateCryptoList()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.stateLiveData.removeObserver(stateObserver)
+    }
+
     private fun observeViewModel() {
-        viewModel.observeData(this, Observer { cryptolist ->
-            cryptolist?.let {
-                cryptoListAdapter.updateData(cryptolist)
-            }
-        })
-        viewModel.observeState(this, Observer { state ->
-            state?.let {
-                isLastPage = state.loadedAllItems
-                when (it.state) {
-                    DEFAULT -> {
-                        isLoading = false
-                        swipeRefreshLayout.isRefreshing = false
-                        cryptoListAdapter.removeLoadingViewFooter()
-                    }
-                    LOADING -> {
-                        swipeRefreshLayout.isRefreshing = true
-                        isLoading = true
-                    }
-                    PAGINATING -> {
-                        isLoading = true
-                    }
-                    ERROR_API -> {
-                        isLoading = false
-                        cryptoListAdapter.removeLoadingViewFooter()
-                    }
-                    ERROR_NO_INTERNET -> {
-                        isLoading = false
-                        cryptoListAdapter.removeLoadingViewFooter()
-                    }
-                }
-            }
-        })
+        viewModel.stateLiveData.observe(this, stateObserver)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
