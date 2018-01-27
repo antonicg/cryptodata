@@ -29,7 +29,7 @@ class CryptoListViewModel
     }
 
     fun updateCryptoList() {
-        val pageNum = stateLiveData.value?.pageNum ?: 0
+        val pageNum = getCurrentPageNum()
         val state = if (pageNum == 0) LOADING else PAGINATING
         stateLiveData.value = CryptoListState(state, pageNum, false, this.cryptoList)
         getCryptoList(pageNum)
@@ -41,6 +41,13 @@ class CryptoListViewModel
         stateLiveData.value = CryptoListState(LOADING, pageNum, false, cryptoList)
         updateCryptoList()
     }
+
+    fun restoreCryptoList() {
+        val pageNum = getCurrentPageNum()
+        stateLiveData.value = CryptoListState(DEFAULT, pageNum, false, cryptoList)
+    }
+
+    private fun getCurrentPageNum() = stateLiveData.value?.pageNum ?: 0
 
     private fun getCryptoList(page:Int) {
         cryptoListUseCases.getCryptoListBy(page)

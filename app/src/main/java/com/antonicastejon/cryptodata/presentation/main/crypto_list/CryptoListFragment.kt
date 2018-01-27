@@ -76,7 +76,9 @@ class CryptoListFragment : Fragment() {
         super.onCreate(savedInstanceState)
         viewModel = ViewModelProviders.of(this, viewModelFactory).get(CryptoListViewModel::class.java)
         observeViewModel()
-        viewModel.updateCryptoList()
+        savedInstanceState?.let {
+            viewModel.restoreCryptoList()
+        } ?: viewModel.updateCryptoList()
     }
 
     override fun onDestroy() {
