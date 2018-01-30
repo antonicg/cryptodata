@@ -3,17 +3,20 @@ package com.antonicastejon.cryptodata.viewmodels
 import android.arch.core.executor.testing.InstantTaskExecutorRule
 import android.arch.lifecycle.Observer
 import com.antonicastejon.cryptodata.common.SchedulerImmediate
+import com.antonicastejon.cryptodata.common.limitCryptoListSizeArrayEmptyCryptoViewModel
 import com.antonicastejon.cryptodata.common.mock
-import com.antonicastejon.cryptodata.common.oneSizeArrayEmptyCryptoViewModel
 import com.antonicastejon.cryptodata.common.whenever
 import com.antonicastejon.cryptodata.domain.CryptoListUseCases
+import com.antonicastejon.cryptodata.domain.CryptoViewModel
 import com.antonicastejon.cryptodata.presentation.main.crypto_list.*
 import io.reactivex.Single
+import junit.framework.Assert.assertEquals
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers
-import org.mockito.Mockito.atLeastOnce
-import org.mockito.Mockito.verify
+import org.mockito.Mockito.*
 
 /**
  * Created by Antoni Castejón
@@ -28,24 +31,17 @@ class CryptoListUnitTest {
     val cryptoListUseCases = mock<CryptoListUseCases>()
     val observerState = mock<Observer<CryptoListState>>()
 
-    val viewmodel by lazy { CryptoListViewModel(cryptoListUseCases, SchedulerImmediate(), SchedulerImmediate()) }
+    lateinit var viewmodel:CryptoListViewModel
 
-    @Test
-    fun testCryptoList_updateCryptoList_LoadingState() {
-        whenever(cryptoListUseCases.getCryptoListBy(ArgumentMatchers.anyInt()))
-                .thenReturn(Single.just(emptyList()));
-
-        viewmodel.stateLiveData.observeForever(observerState)
-        viewmodel.updateCryptoList()
-
-        val firstPage = 0
-        verify(cryptoListUseCases).getCryptoListBy(firstPage)
-        verify(observerState, atLeastOnce()).onChanged(CryptoListState(LOADING, firstPage, false, emptyList()))
+    @Before
+    fun initTest() {
+        viewmodel = CryptoListViewModel(cryptoListUseCases, SchedulerImmediate(), SchedulerImmediate())
+        reset(cryptoListUseCases, observerState)
     }
 
     @Test
-    fun testCryptoList_updateCryptoList_Success() {
-        val response = oneSizeArrayEmptyCryptoViewModel()
+    fun testCryptoList_updateCryptoList_LoadOnePage() {
+        val response = arrayListOf(CryptoViewModel())
         whenever(cryptoListUseCases.getCryptoListBy(ArgumentMatchers.anyInt()))
                 .thenReturn(Single.just(response))
 
@@ -54,28 +50,44 @@ class CryptoListUnitTest {
 
         val firstPage = 0
         verify(cryptoListUseCases).getCryptoListBy(firstPage)
-        verify(observerState, atLeastOnce()).onChanged(CryptoListState(DEFAULT, firstPage + 1, true, response))
+
+        val argumentCaptor = ArgumentCaptor.forClass(CryptoListState::class.java)
+        val expectedLoadingState = CryptoListState(LOADING, firstPage, false, emptyList())
+        val expectedDefaultState = CryptoListState(DEFAULT, firstPage+1, true, response)
+        argumentCaptor.run {
+            verify(observerState, times(3)).onChanged(capture())
+            val (initialState, loadingState, defaultState) = allValues
+            assertEquals(loadingState, expectedLoadingState)
+            assertEquals(defaultState, expectedDefaultState)
+        }
     }
 
-    // TODO: Test state pagination not working
-//    @Test
-//    fun testCryptoList_updateCryptoList_Pagination() {
-//        val response = limitCryptoListSizeArrayEmptyCryptoViewModel()
-//        whenever(cryptoListUseCases.getCryptoListBy(ArgumentMatchers.anyInt()))
-//                .thenReturn(Single.just(response))
-//
-//        viewmodel.stateLiveData.observeForever(observerState)
-//        viewmodel.updateCryptoList()
-//        viewmodel.updateCryptoList()
-//
-//        val currentExpectedCryptoList = mutableListOf<CryptoViewModel>()
-//        currentExpectedCryptoList.addAll(response)
-//        currentExpectedCryptoList.addAll(response)
-//
-//        val pageNum = 1
-//        verify(cryptoListUseCases).getCryptoListBy(pageNum)
-//        verify(observerState, atLeastOnce()).onChanged(CryptoListState(PAGINATING, pageNum, false, response))
-//    }
+    @Test
+    fun testCryptoList_updateCryptoList_LoadPagination() {
+        val response = limitCryptoListSizeArrayEmptyCryptoViewModel()
+        whenever(cryptoListUseCases.getCryptoListBy(ArgumentMatchers.anyInt()))
+                .thenReturn(Single.just(response))
+
+        viewmodel.stateLiveData.observeForever(observerState)
+        viewmodel.updateCryptoList()
+        viewmodel.updateCryptoList()
+
+        verify(cryptoListUseCases, times(2)).getCryptoListBy(ArgumentMatchers.anyInt())
+
+        val expectedFinalResponse = mutableListOf<CryptoViewModel>()
+        expectedFinalResponse.addAll(response)
+        expectedFinalResponse.addAll(response)
+
+        val argumentCaptor = ArgumentCaptor.forClass(CryptoListState::class.java)
+        val expectedPaginatingState = CryptoListState(PAGINATING, 1, false, response)
+        val expectedFinalState = CryptoListState(DEFAULT, 2, false, expectedFinalResponse)
+        argumentCaptor.run {
+            verify(observerState, times(5)).onChanged(capture())
+            val (initialState, loadingState, defaultState, paginatingState, finalState) = allValues
+            assertEquals(expectedPaginatingState, paginatingState)
+            assertEquals(expectedFinalState, finalState)
+        }
+    }
 
     @Test
     fun testCryptoList_updateCryptoList_Error() {
@@ -88,6 +100,15 @@ class CryptoListUnitTest {
 
         val page = 0
         verify(cryptoListUseCases).getCryptoListBy(page)
-        verify(observerState, atLeastOnce()).onChanged(CryptoListState(ERROR_API, page, false, emptyList()))
+
+        val argumentCaptor = ArgumentCaptor.forClass(CryptoListState::class.java)
+        val expectedLoadingState = CryptoListState(LOADING, page, false, emptyList())
+        val expectedErrorState = CryptoListState(ERROR_API, page, false, emptyList())
+        argumentCaptor.run {
+            verify(observerState, times(3)).onChanged(capture())
+            val (initialState, loadingState, errorState) = allValues
+            assertEquals(loadingState, expectedLoadingState)
+            assertEquals(errorState, expectedErrorState)
+        }
     }
 }
