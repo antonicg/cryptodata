@@ -22,32 +22,27 @@ class CryptoListViewModel
 
     val stateLiveData =  MutableLiveData<CryptoListState>()
 
-    private val cryptoList = mutableListOf<CryptoViewModel>()
-
     init {
-        stateLiveData.value = CryptoListState(DEFAULT, 0, false, cryptoList)
+        stateLiveData.value = CryptoListState(DEFAULT, 0, false, emptyList())
     }
 
     fun updateCryptoList() {
-        val pageNum = getCurrentPageNum()
+        val pageNum = obtainCurrentPageNum()
         val state = if (pageNum == 0) LOADING else PAGINATING
-        stateLiveData.value = CryptoListState(state, pageNum, false, this.cryptoList)
+        stateLiveData.value = CryptoListState(state, pageNum, false, obtainCurrentData())
         getCryptoList(pageNum)
     }
 
     fun resetCryptoList() {
         val pageNum = 0
-        cryptoList.clear()
-        stateLiveData.value = CryptoListState(LOADING, pageNum, false, cryptoList)
+        stateLiveData.value = CryptoListState(LOADING, pageNum, false, emptyList())
         updateCryptoList()
     }
 
     fun restoreCryptoList() {
-        val pageNum = getCurrentPageNum()
-        stateLiveData.value = CryptoListState(DEFAULT, pageNum, false, cryptoList)
+        val pageNum = obtainCurrentPageNum()
+        stateLiveData.value = CryptoListState(DEFAULT, pageNum, false, obtainCurrentData())
     }
-
-    private fun getCurrentPageNum() = stateLiveData.value?.pageNum ?: 0
 
     private fun getCryptoList(page:Int) {
         cryptoListUseCases.getCryptoListBy(page)
@@ -57,13 +52,23 @@ class CryptoListViewModel
     }
 
     private fun onCryptoListReceived(cryptoList: List<CryptoViewModel>) {
-        this.cryptoList.addAll(cryptoList)
-        stateLiveData.value = CryptoListState(DEFAULT, (stateLiveData.value?.pageNum ?: 0) + 1, cryptoList.size < LIMIT_CRYPTO_LIST, this.cryptoList)
+        val currentCryptoList = obtainCurrentData().toMutableList()
+        val currentPageNum = obtainCurrentPageNum() + 1
+        val areAllItemsLoaded = cryptoList.size < LIMIT_CRYPTO_LIST
+        currentCryptoList.addAll(cryptoList)
+        stateLiveData.value = CryptoListState(DEFAULT, currentPageNum, areAllItemsLoaded, currentCryptoList)
     }
 
     private fun onError(error: Throwable) {
         val pageNum = stateLiveData.value?.pageNum ?: 0
-        stateLiveData.value = CryptoListState(ERROR_API, pageNum, stateLiveData.value?.loadedAllItems ?: false, this.cryptoList)
+        stateLiveData.value = CryptoListState(ERROR_API, pageNum, obtainCurrentLoadedAllItems(), obtainCurrentData())
         error.printStackTrace()
     }
+
+    private fun obtainCurrentPageNum() = stateLiveData.value?.pageNum ?: 0
+
+    private fun obtainCurrentData() = stateLiveData.value?.data ?: emptyList()
+
+    private fun obtainCurrentLoadedAllItems() = stateLiveData.value?.loadedAllItems ?: false
+
 }
