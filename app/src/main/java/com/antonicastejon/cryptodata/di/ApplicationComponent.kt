@@ -1,6 +1,5 @@
 package com.antonicastejon.cryptodata.di
 
-import com.alexfacciorusso.daggerviewmodel.DaggerViewModelInjectionModule
 import com.antonicastejon.cryptodata.CryptoApplication
 import com.antonicastejon.cryptodata.presentation.main.di.MainActivityModule
 import dagger.Component
@@ -15,7 +14,7 @@ import javax.inject.Singleton
 @Component(modules = arrayOf(
         ApplicationModule::class,
         AndroidSupportInjectionModule::class,
-        DaggerViewModelInjectionModule::class,
+        ViewModelFactoryModule::class,
         NetModule::class,
         RepositoryModule::class,
         UseCasesModule::class,
