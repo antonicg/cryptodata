@@ -42,25 +42,22 @@ class CryptoListFragment : Fragment() {
     private val stateObserver = Observer<CryptoListState> { state ->
         state?.let {
             isLastPage = state.loadedAllItems
-            when (it.state) {
-                DEFAULT -> {
+            when (state) {
+                is DefaultState -> {
                     isLoading = false
                     swipeRefreshLayout.isRefreshing = false
                     cryptoListAdapter.updateData(it.data)
                 }
-                LOADING -> {
+                is LoadingState -> {
                     swipeRefreshLayout.isRefreshing = true
                     isLoading = true
                 }
-                PAGINATING -> {
+                is PaginatingState -> {
                     isLoading = true
                 }
-                ERROR_API -> {
+                is ErrorState -> {
                     isLoading = false
-                    cryptoListAdapter.removeLoadingViewFooter()
-                }
-                ERROR_NO_INTERNET -> {
-                    isLoading = false
+                    swipeRefreshLayout.isRefreshing = false
                     cryptoListAdapter.removeLoadingViewFooter()
                 }
             }

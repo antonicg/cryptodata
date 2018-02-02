@@ -52,8 +52,8 @@ class CryptoListUnitTest {
         verify(cryptoListUseCases).getCryptoListBy(firstPage)
 
         val argumentCaptor = ArgumentCaptor.forClass(CryptoListState::class.java)
-        val expectedLoadingState = CryptoListState(LOADING, firstPage, false, emptyList())
-        val expectedDefaultState = CryptoListState(DEFAULT, firstPage+1, true, response)
+        val expectedLoadingState = LoadingState(firstPage, false, emptyList())
+        val expectedDefaultState = DefaultState(firstPage+1, true, response)
         argumentCaptor.run {
             verify(observerState, times(3)).onChanged(capture())
             val (initialState, loadingState, defaultState) = allValues
@@ -79,8 +79,8 @@ class CryptoListUnitTest {
         expectedFinalResponse.addAll(response)
 
         val argumentCaptor = ArgumentCaptor.forClass(CryptoListState::class.java)
-        val expectedPaginatingState = CryptoListState(PAGINATING, 1, false, response)
-        val expectedFinalState = CryptoListState(DEFAULT, 2, false, expectedFinalResponse)
+        val expectedPaginatingState = PaginatingState(1, false, response)
+        val expectedFinalState = DefaultState(2, false, expectedFinalResponse)
         argumentCaptor.run {
             verify(observerState, times(5)).onChanged(capture())
             val (initialState, loadingState, defaultState, paginatingState, finalState) = allValues
@@ -91,7 +91,8 @@ class CryptoListUnitTest {
 
     @Test
     fun testCryptoList_updateCryptoList_Error() {
-        val response = Throwable("Error response")
+        val errorMessage = "Error response"
+        val response = Throwable(errorMessage)
         whenever(cryptoListUseCases.getCryptoListBy(ArgumentMatchers.anyInt()))
                 .thenReturn(Single.error(response))
 
@@ -102,8 +103,8 @@ class CryptoListUnitTest {
         verify(cryptoListUseCases).getCryptoListBy(page)
 
         val argumentCaptor = ArgumentCaptor.forClass(CryptoListState::class.java)
-        val expectedLoadingState = CryptoListState(LOADING, page, false, emptyList())
-        val expectedErrorState = CryptoListState(ERROR_API, page, false, emptyList())
+        val expectedLoadingState = LoadingState(page, false, emptyList())
+        val expectedErrorState = ErrorState(errorMessage, page, false, emptyList())
         argumentCaptor.run {
             verify(observerState, times(3)).onChanged(capture())
             val (initialState, loadingState, errorState) = allValues

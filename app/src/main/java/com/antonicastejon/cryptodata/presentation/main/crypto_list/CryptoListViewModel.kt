@@ -23,25 +23,27 @@ class CryptoListViewModel
     val stateLiveData =  MutableLiveData<CryptoListState>()
 
     init {
-        stateLiveData.value = CryptoListState(DEFAULT, 0, false, emptyList())
+        stateLiveData.value = DefaultState(0, false, emptyList())
     }
 
     fun updateCryptoList() {
         val pageNum = obtainCurrentPageNum()
-        val state = if (pageNum == 0) LOADING else PAGINATING
-        stateLiveData.value = CryptoListState(state, pageNum, false, obtainCurrentData())
+        stateLiveData.value = if (pageNum == 0)
+            LoadingState(pageNum, false, obtainCurrentData())
+        else
+            PaginatingState(pageNum, false, obtainCurrentData())
         getCryptoList(pageNum)
     }
 
     fun resetCryptoList() {
         val pageNum = 0
-        stateLiveData.value = CryptoListState(LOADING, pageNum, false, emptyList())
+        stateLiveData.value = LoadingState(pageNum, false, emptyList())
         updateCryptoList()
     }
 
     fun restoreCryptoList() {
         val pageNum = obtainCurrentPageNum()
-        stateLiveData.value = CryptoListState(DEFAULT, pageNum, false, obtainCurrentData())
+        stateLiveData.value = DefaultState(pageNum, false, obtainCurrentData())
     }
 
     private fun getCryptoList(page:Int) {
@@ -56,13 +58,12 @@ class CryptoListViewModel
         val currentPageNum = obtainCurrentPageNum() + 1
         val areAllItemsLoaded = cryptoList.size < LIMIT_CRYPTO_LIST
         currentCryptoList.addAll(cryptoList)
-        stateLiveData.value = CryptoListState(DEFAULT, currentPageNum, areAllItemsLoaded, currentCryptoList)
+        stateLiveData.value = DefaultState(currentPageNum, areAllItemsLoaded, currentCryptoList)
     }
 
     private fun onError(error: Throwable) {
         val pageNum = stateLiveData.value?.pageNum ?: 0
-        stateLiveData.value = CryptoListState(ERROR_API, pageNum, obtainCurrentLoadedAllItems(), obtainCurrentData())
-        error.printStackTrace()
+        stateLiveData.value = ErrorState(error.message ?: "", pageNum, obtainCurrentLoadedAllItems(), obtainCurrentData())
     }
 
     private fun obtainCurrentPageNum() = stateLiveData.value?.pageNum ?: 0
