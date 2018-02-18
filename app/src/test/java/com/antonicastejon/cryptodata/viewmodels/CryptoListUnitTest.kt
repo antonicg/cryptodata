@@ -2,7 +2,6 @@ package com.antonicastejon.cryptodata.viewmodels
 
 import android.arch.core.executor.testing.InstantTaskExecutorRule
 import android.arch.lifecycle.Observer
-import com.antonicastejon.cryptodata.common.SchedulerImmediate
 import com.antonicastejon.cryptodata.common.limitCryptoListSizeArrayEmptyCryptoViewModel
 import com.antonicastejon.cryptodata.common.mock
 import com.antonicastejon.cryptodata.common.whenever
@@ -10,6 +9,7 @@ import com.antonicastejon.cryptodata.domain.CryptoListUseCases
 import com.antonicastejon.cryptodata.domain.CryptoViewModel
 import com.antonicastejon.cryptodata.presentation.main.crypto_list.*
 import io.reactivex.Single
+import io.reactivex.schedulers.Schedulers
 import junit.framework.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
@@ -17,11 +17,6 @@ import org.junit.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.*
-
-/**
- * Created by Antoni Castejón
- * 21/01/2018.
- */
 
 class CryptoListUnitTest {
     @Rule
@@ -31,11 +26,10 @@ class CryptoListUnitTest {
     val cryptoListUseCases = mock<CryptoListUseCases>()
     val observerState = mock<Observer<CryptoListState>>()
 
-    lateinit var viewmodel:CryptoListViewModel
+    val viewmodel by lazy { CryptoListViewModel(cryptoListUseCases, Schedulers.trampoline(), Schedulers.trampoline()) }
 
     @Before
     fun initTest() {
-        viewmodel = CryptoListViewModel(cryptoListUseCases, SchedulerImmediate(), SchedulerImmediate())
         reset(cryptoListUseCases, observerState)
     }
 
