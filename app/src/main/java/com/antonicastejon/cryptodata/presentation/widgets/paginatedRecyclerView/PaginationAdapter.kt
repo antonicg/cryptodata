@@ -6,11 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import com.antonicastejon.cryptodata.R
 
-/**
- * Created by Antoni Castejón
- * 20/01/2018.
- */
-
 private const val LOADING_VIEW_TYPE = 0
 private const val ITEM_VIEW_TYPE = 1
 

@@ -8,9 +8,6 @@ import dagger.android.AndroidInjector
 import dagger.android.support.FragmentKey
 import dagger.multibindings.IntoMap
 
-/**
- * Created by Antoni Castejón on 03/01/2018.
- */
 @Subcomponent/*(modules = ...)*/
 interface CryptoListFragmentSubcomponent: AndroidInjector<CryptoListFragment> {
     @Subcomponent.Builder

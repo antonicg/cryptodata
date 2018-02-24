@@ -2,10 +2,6 @@ package com.antonicastejon.cryptodata.presentation.main.crypto_list
 
 import com.antonicastejon.cryptodata.domain.CryptoViewModel
 
-/**
- * Created by Antoni Castejón
- * 20/01/2018.
- */
 sealed class CryptoListState {
     abstract val pageNum:Int
     abstract val loadedAllItems:Boolean

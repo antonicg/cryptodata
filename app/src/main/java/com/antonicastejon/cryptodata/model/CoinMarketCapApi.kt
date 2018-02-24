@@ -5,9 +5,6 @@ import io.reactivex.Single
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-/**
- * Created by Antoni Castejón on 04/01/2018.
- */
 interface CoinMarketCapApi {
     @GET("v1/ticker/")
     fun getCryptoList(@Query("start" )start:Int, @Query("limit") limit:Int) : Single<List<Crypto>>

@@ -11,10 +11,6 @@ import io.reactivex.Scheduler
 import javax.inject.Inject
 import javax.inject.Named
 
-/**
- * Created by Antoni Castejón on 31/12/2017.
- */
-
 private val TAG = CryptoListViewModel::class.java.name
 
 class CryptoListViewModel

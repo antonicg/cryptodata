@@ -9,10 +9,6 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 
-/**
- * Created by Antoni Castejón on 04/01/2018.
- */
-
 private const val BASE_URL = "https://api.coinmarketcap.com/"
 
 @Module

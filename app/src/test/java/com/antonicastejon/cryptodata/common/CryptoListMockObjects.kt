@@ -6,10 +6,6 @@ import com.antonicastejon.cryptodata.model.Crypto
 import java.util.*
 import kotlin.collections.ArrayList
 
-/**
- * Created by Antoni Castejón
- * 26/01/2018.
- */
 fun oneSizeArrayEmptyCryptoViewModel(): List<CryptoViewModel> =
     ArrayList<CryptoViewModel>(Collections.nCopies(1, CryptoViewModel()))
 

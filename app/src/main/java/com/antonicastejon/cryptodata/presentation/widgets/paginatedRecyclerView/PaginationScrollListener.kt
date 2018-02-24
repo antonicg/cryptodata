@@ -3,11 +3,6 @@ package com.antonicastejon.cryptodata.presentation.widgets.paginatedRecyclerView
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 
-/**
- * Created by Antoni Castejón
- * 20/01/2018.
- */
-
 private val TAG: String = PaginationScrollListener::class.java.name
 
 abstract class PaginationScrollListener(val layoutManager: LinearLayoutManager) : RecyclerView.OnScrollListener() {

@@ -19,9 +19,6 @@ import kotlinx.android.synthetic.main.crypto_list_fragment.*
 import kotlinx.android.synthetic.main.crypto_list_fragment.view.*
 import javax.inject.Inject
 
-/**
- * Created by Antoni Castejón on 29/12/2017.
- */
 val CRYPTO_LIST_FRAGMENT_TAG = CryptoListFragment::class.java.name
 
 private val TAG = CryptoListFragment::class.java.name

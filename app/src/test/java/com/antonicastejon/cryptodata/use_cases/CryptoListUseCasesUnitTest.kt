@@ -12,10 +12,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.mockito.ArgumentMatchers.anyInt
 
-/**
- * Created by Antoni Castejón
- * 28/01/2018.
- */
 class CryptoListUseCasesUnitTest {
     @Rule
     @JvmField

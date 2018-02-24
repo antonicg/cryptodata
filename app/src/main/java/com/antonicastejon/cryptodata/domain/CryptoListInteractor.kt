@@ -4,10 +4,6 @@ import com.antonicastejon.cryptodata.model.CoinMarketCapRepository
 import com.antonicastejon.cryptodata.model.Crypto
 import io.reactivex.Single
 
-/**
- * Created by Antoni Castejón on 31/12/2017.
- */
-
 const val LIMIT_CRYPTO_LIST = 20
 
 class CryptoListInteractor(private val coinMarketCapRepository: CoinMarketCapRepository) : CryptoListUseCases {

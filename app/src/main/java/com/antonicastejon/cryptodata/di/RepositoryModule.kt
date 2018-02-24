@@ -7,9 +7,6 @@ import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
 
-/**
- * Created by Antoni Castejón on 04/01/2018.
- */
 @Module
 class RepositoryModule {
 

@@ -5,11 +5,6 @@ import com.antonicastejon.cryptodata.presentation.main.crypto_list.CryptoListFra
 import dagger.Subcomponent
 import dagger.android.AndroidInjector
 
-
-
-/**
- * Created by Antoni Castejón on 03/01/2018.
- */
 @Subcomponent(modules = arrayOf(CryptoListFragmentModule::class))
 interface MainActivitySubcomponent : AndroidInjector<MainActivity> {
     @Subcomponent.Builder

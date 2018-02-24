@@ -4,9 +4,6 @@ import android.os.Parcel
 import android.os.Parcelable
 import io.reactivex.Single
 
-/**
- * Created by Antoni Castejón on 31/12/2017.
- */
 interface CryptoListUseCases {
     fun getCryptoListBy(page: Int) : Single<List<CryptoViewModel>>
 }
