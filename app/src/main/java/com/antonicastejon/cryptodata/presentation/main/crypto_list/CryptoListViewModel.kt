@@ -37,11 +37,6 @@ class CryptoListViewModel
         updateCryptoList()
     }
 
-    fun restoreCryptoList() {
-        val pageNum = obtainCurrentPageNum()
-        stateLiveData.value = DefaultState(pageNum, false, obtainCurrentData())
-    }
-
     private fun getCryptoList(page:Int) {
         cryptoListUseCases.getCryptoListBy(page)
                 .subscribeOn(subscribeOnScheduler)

@@ -5,6 +5,7 @@ import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.os.Bundle
+import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
@@ -12,7 +13,6 @@ import android.view.ViewGroup
 import com.antonicastejon.cryptodata.R
 import com.antonicastejon.cryptodata.domain.LIMIT_CRYPTO_LIST
 import com.antonicastejon.cryptodata.presentation.common.CryptoListRecyclerAdapter
-import com.antonicastejon.cryptodata.presentation.common.ViewLifecycleFragment
 import com.antonicastejon.cryptodata.presentation.widgets.paginatedRecyclerView.PaginationScrollListener
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.crypto_list_fragment.*
@@ -25,7 +25,7 @@ private val TAG = CryptoListFragment::class.java.name
 
 fun newCryptoListFragment() = CryptoListFragment()
 
-class CryptoListFragment : ViewLifecycleFragment() {
+class CryptoListFragment : Fragment() {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -99,15 +99,13 @@ class CryptoListFragment : ViewLifecycleFragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         observeViewModel()
-        savedInstanceState?.let {
-            viewModel.restoreCryptoList()
-        } ?: viewModel.updateCryptoList()
+        if (savedInstanceState == null) {
+            viewModel.updateCryptoList()
+        }
     }
 
     private fun observeViewModel() {
-        getFragmentLifecycleOwner()?.let {
-            viewModel.stateLiveData.observe(it, stateObserver)
-        }
+        viewModel.stateLiveData.observe(this, stateObserver)
     }
 
     private fun loadNextPage() {
