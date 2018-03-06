@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">CryptoData</string>
 
+    <string name="search_title">Search</string>
+
     <string name="price_alts">%1$s USD\n%2$s BTC</string>
     <string name="price_btc">%1$s USD</string>
     <string name="change_percent">%1$s</string>

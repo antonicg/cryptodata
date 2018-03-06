@@ -7,9 +7,7 @@ import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import com.antonicastejon.cryptodata.R
 import com.antonicastejon.cryptodata.domain.LIMIT_CRYPTO_LIST
 import com.antonicastejon.cryptodata.presentation.common.CryptoListRecyclerAdapter
@@ -75,7 +73,10 @@ class CryptoListFragment : Fragment() {
     }
 
     private fun initializeToolbar(view:View) {
-        view.toolbar.title = getString(R.string.app_name)
+        view.toolbar?.let {
+            it.title = getString(R.string.app_name)
+            it.inflateMenu(R.menu.crypto_list_menu)
+        }
     }
 
     private fun initializeRecyclerView(view:View) {
@@ -96,12 +97,21 @@ class CryptoListFragment : Fragment() {
         viewModel = ViewModelProviders.of(this, viewModelFactory).get(CryptoListViewModel::class.java)
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.crypto_list_menu, menu)
+    }
+
+
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         observeViewModel()
         if (savedInstanceState == null) {
             viewModel.updateCryptoList()
         }
+
+        activity?.invalidateOptionsMenu()
     }
 
     private fun observeViewModel() {
