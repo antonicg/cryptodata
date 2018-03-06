@@ -17,23 +17,23 @@ class CryptoListViewModel
 @Inject constructor(private val cryptoListUseCases: CryptoListUseCases, @Named(SCHEDULER_IO) val subscribeOnScheduler:Scheduler, @Named(SCHEDULER_MAIN_THREAD) val observeOnScheduler: Scheduler) : ViewModel() {
 
     val stateLiveData =  MutableLiveData<CryptoListState>()
+    private var pageNum = 0
 
     init {
-        stateLiveData.value = DefaultState(0, false, emptyList())
+        stateLiveData.value = DefaultState(false, emptyList())
     }
 
     fun updateCryptoList() {
-        val pageNum = obtainCurrentPageNum()
         stateLiveData.value = if (pageNum == 0)
-            LoadingState(pageNum, false, obtainCurrentData())
+            LoadingState(false, obtainCurrentData())
         else
-            PaginatingState(pageNum, false, obtainCurrentData())
+            PaginatingState(false, obtainCurrentData())
         getCryptoList(pageNum)
     }
 
     fun resetCryptoList() {
-        val pageNum = 0
-        stateLiveData.value = LoadingState(pageNum, false, emptyList())
+        pageNum = 0
+        stateLiveData.value = LoadingState(false, emptyList())
         updateCryptoList()
     }
 
@@ -46,21 +46,15 @@ class CryptoListViewModel
 
     private fun onCryptoListReceived(cryptoList: List<CryptoViewModel>) {
         val currentCryptoList = obtainCurrentData().toMutableList()
-        val currentPageNum = obtainCurrentPageNum() + 1
+        pageNum++
         val areAllItemsLoaded = cryptoList.size < LIMIT_CRYPTO_LIST
         currentCryptoList.addAll(cryptoList)
-        stateLiveData.value = DefaultState(currentPageNum, areAllItemsLoaded, currentCryptoList)
+        stateLiveData.value = DefaultState(areAllItemsLoaded, currentCryptoList)
     }
 
     private fun onError(error: Throwable) {
-        val pageNum = stateLiveData.value?.pageNum ?: 0
-        stateLiveData.value = ErrorState(error.message ?: "", pageNum, obtainCurrentLoadedAllItems(), obtainCurrentData())
+        stateLiveData.value = ErrorState(error.message ?: "", obtainCurrentData())
     }
 
-    private fun obtainCurrentPageNum() = stateLiveData.value?.pageNum ?: 0
-
     private fun obtainCurrentData() = stateLiveData.value?.data ?: emptyList()
-
-    private fun obtainCurrentLoadedAllItems() = stateLiveData.value?.loadedAllItems ?: false
-
 }

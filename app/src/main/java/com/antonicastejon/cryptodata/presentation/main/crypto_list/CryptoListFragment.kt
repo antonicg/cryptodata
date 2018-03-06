@@ -1,5 +1,6 @@
 package com.antonicastejon.cryptodata.presentation.main.crypto_list
 
+import android.app.SearchManager
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
@@ -7,6 +8,8 @@ import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.SearchView
+import android.util.Log
 import android.view.*
 import com.antonicastejon.cryptodata.R
 import com.antonicastejon.cryptodata.domain.LIMIT_CRYPTO_LIST
@@ -23,12 +26,14 @@ private val TAG = CryptoListFragment::class.java.name
 
 fun newCryptoListFragment() = CryptoListFragment()
 
-class CryptoListFragment : Fragment() {
+class CryptoListFragment : Fragment(), SearchView.OnQueryTextListener {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
 
     private lateinit var viewModel: CryptoListViewModel
+
+    private lateinit var searchView: SearchView
 
     private val cryptoListAdapter by lazy { CryptoListRecyclerAdapter() }
     private var isLoading = false
@@ -36,24 +41,31 @@ class CryptoListFragment : Fragment() {
 
     private val stateObserver = Observer<CryptoListState> { state ->
         state?.let {
-            isLastPage = state.loadedAllItems
             when (state) {
                 is DefaultState -> {
                     isLoading = false
+                    isLastPage = state.loadedAllItems
                     swipeRefreshLayout.isRefreshing = false
                     cryptoListAdapter.updateData(it.data)
                 }
                 is LoadingState -> {
+                    isLastPage = state.loadedAllItems
                     swipeRefreshLayout.isRefreshing = true
                     isLoading = true
                 }
                 is PaginatingState -> {
+                    isLastPage = state.loadedAllItems
                     isLoading = true
                 }
                 is ErrorState -> {
                     isLoading = false
                     swipeRefreshLayout.isRefreshing = false
                     cryptoListAdapter.removeLoadingViewFooter()
+                }
+                is SearchState -> {
+                    isLoading = false
+                    swipeRefreshLayout.isRefreshing = false
+                    cryptoListAdapter.updateData(it.data)
                 }
             }
         }
@@ -73,10 +85,21 @@ class CryptoListFragment : Fragment() {
     }
 
     private fun initializeToolbar(view:View) {
-        view.toolbar?.let {
-            it.title = getString(R.string.app_name)
-            it.inflateMenu(R.menu.crypto_list_menu)
+        view.toolbar?.apply {
+            title = getString(R.string.app_name)
+            inflateMenu(R.menu.crypto_list_menu)
+            searchView = obtainSearchView(menu)
         }
+    }
+
+    private fun obtainSearchView(menu: Menu): SearchView {
+        val searchView = menu.findItem(R.id.search).actionView as SearchView
+        activity?.let {
+            val searchManager = it.getSystemService(Context.SEARCH_SERVICE) as SearchManager
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(it.componentName))
+            searchView.setOnQueryTextListener(this)
+        }
+        return searchView
     }
 
     private fun initializeRecyclerView(view:View) {
@@ -102,16 +125,14 @@ class CryptoListFragment : Fragment() {
         inflater.inflate(R.menu.crypto_list_menu, menu)
     }
 
-
-
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+        activity?.invalidateOptionsMenu()
+
         observeViewModel()
         if (savedInstanceState == null) {
             viewModel.updateCryptoList()
         }
-
-        activity?.invalidateOptionsMenu()
     }
 
     private fun observeViewModel() {
@@ -123,6 +144,14 @@ class CryptoListFragment : Fragment() {
         viewModel.updateCryptoList()
     }
 
+    override fun onQueryTextSubmit(query: String?): Boolean {
+        return true
+    }
+
+    override fun onQueryTextChange(newText: String?): Boolean {
+        Log.d(TAG, "onQueryTextChange: $newText")
+        return true
+    }
 
     inner class OnScrollListener(layoutManager: LinearLayoutManager) : PaginationScrollListener(layoutManager) {
         override fun isLoading() = isLoading
