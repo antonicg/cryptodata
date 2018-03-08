@@ -1,25 +1,33 @@
 package com.antonicastejon.cryptodata.presentation.main.crypto_list
 
 import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModel
-import com.antonicastejon.cryptodata.di.SCHEDULER_IO
-import com.antonicastejon.cryptodata.di.SCHEDULER_MAIN_THREAD
 import com.antonicastejon.cryptodata.domain.CryptoListUseCases
 import com.antonicastejon.cryptodata.domain.CryptoViewModel
+import com.antonicastejon.cryptodata.domain.InteractorResponse
 import com.antonicastejon.cryptodata.domain.LIMIT_CRYPTO_LIST
-import io.reactivex.Scheduler
 import javax.inject.Inject
-import javax.inject.Named
 
 private val TAG = CryptoListViewModel::class.java.name
 
 class CryptoListViewModel
-@Inject constructor(private val cryptoListUseCases: CryptoListUseCases, @Named(SCHEDULER_IO) val subscribeOnScheduler:Scheduler, @Named(SCHEDULER_MAIN_THREAD) val observeOnScheduler: Scheduler) : ViewModel() {
+@Inject constructor(private val cryptoListUseCases: CryptoListUseCases) : ViewModel() {
 
     val stateLiveData =  MutableLiveData<CryptoListState>()
+    val observer = Observer<InteractorResponse> {
+        it?.let {
+            if (it.isSuccessful) {
+                onCryptoListReceived(it.data)
+            } else {
+                onError(Throwable(it.errorMessage))
+            }
+        }
+    }
 
     init {
         stateLiveData.value = DefaultState(0, false, emptyList())
+        cryptoListUseCases.getSubscriber().observeForever{ observer }
     }
 
     fun updateCryptoList() {
@@ -39,9 +47,6 @@ class CryptoListViewModel
 
     private fun getCryptoList(page:Int) {
         cryptoListUseCases.getCryptoListBy(page)
-                .subscribeOn(subscribeOnScheduler)
-                .observeOn(observeOnScheduler)
-                .subscribe(this::onCryptoListReceived, this::onError)
     }
 
     private fun onCryptoListReceived(cryptoList: List<CryptoViewModel>) {

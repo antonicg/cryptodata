@@ -1,11 +1,12 @@
 package com.antonicastejon.cryptodata.domain
 
+import android.arch.lifecycle.LiveData
 import android.os.Parcel
 import android.os.Parcelable
-import io.reactivex.Single
 
 interface CryptoListUseCases {
-    fun getCryptoListBy(page: Int) : Single<List<CryptoViewModel>>
+    fun getSubscriber() : LiveData<InteractorResponse>
+    fun getCryptoListBy(page: Int)
 }
 
 val emptyCryptoViewModel = CryptoViewModel()
