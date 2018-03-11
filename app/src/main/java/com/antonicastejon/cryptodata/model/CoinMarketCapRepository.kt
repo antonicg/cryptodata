@@ -5,5 +5,5 @@ import retrofit2.Response
 
 interface CoinMarketCapRepository {
 
-    fun getCryptoList(page:Int, limit:Int) : Deferred<Response<List<Crypto>>>
+    suspend fun getCryptoList(page:Int, limit:Int) : Deferred<Response<List<Crypto>>>
 }

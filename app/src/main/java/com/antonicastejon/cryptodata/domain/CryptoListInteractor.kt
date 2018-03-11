@@ -10,11 +10,17 @@ const val LIMIT_CRYPTO_LIST = 1800
 
 class CryptoListInteractor(private val coinMarketCapRepository: CoinMarketCapRepository) : CryptoListUseCases {
 
+    val liveData = MutableLiveData<InteractorResponse>()
+    var callback: ((InteractorResponse?) -> Unit)? = null
 
-    private val liveData = MutableLiveData<InteractorResponse>()
-    private val crashLogger = { throwable : Throwable -> throwable.printStackTrace() }
+    override fun observe(callback: (InteractorResponse?) -> Unit) {
+        this.callback = callback
+        liveData.observeForever{ response -> callback(response) }
+    }
 
-    override fun getSubscriber() = liveData
+    override fun clear() {
+        callback?.let { liveData.removeObserver(it) }
+    }
 
     override fun getCryptoListBy(page: Int) {
         async(UI) {
