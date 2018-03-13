@@ -1,12 +1,11 @@
 package com.antonicastejon.cryptodata.domain
 
+import android.arch.lifecycle.LiveData
 import android.os.Parcel
 import android.os.Parcelable
 
-interface CryptoListUseCases {
-    fun observe(callback: (InteractorResponse?) -> Unit)
-    fun clear()
-    fun getCryptoListBy(page: Int)
+interface CryptoListUseCase {
+    fun getCryptoListBy(page: Int): LiveData<InteractorResponse>
 }
 
 val emptyCryptoViewModel = CryptoViewModel()

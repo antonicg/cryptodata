@@ -1,7 +1,7 @@
 package com.antonicastejon.cryptodata.di
 
 import com.antonicastejon.cryptodata.domain.CryptoListInteractor
-import com.antonicastejon.cryptodata.domain.CryptoListUseCases
+import com.antonicastejon.cryptodata.domain.CryptoListUseCase
 import com.antonicastejon.cryptodata.model.CoinMarketCapRepository
 import dagger.Module
 import dagger.Provides
@@ -10,5 +10,5 @@ import dagger.Provides
 class UseCasesModule {
 
     @Provides
-    fun providesCryptoListUseCases(coinMarketCapRepository: CoinMarketCapRepository): CryptoListUseCases = CryptoListInteractor(coinMarketCapRepository)
+    fun providesCryptoListUseCases(coinMarketCapRepository: CoinMarketCapRepository): CryptoListUseCase = CryptoListInteractor(coinMarketCapRepository)
 }

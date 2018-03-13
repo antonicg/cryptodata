@@ -1,47 +1,41 @@
 package com.antonicastejon.cryptodata.domain
 
+import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.Transformations
+import com.antonicastejon.cryptodata.model.ApiResponse
 import com.antonicastejon.cryptodata.model.CoinMarketCapRepository
 import com.antonicastejon.cryptodata.model.Crypto
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
 
 const val LIMIT_CRYPTO_LIST = 1800
 
-class CryptoListInteractor(private val coinMarketCapRepository: CoinMarketCapRepository) : CryptoListUseCases {
+class CryptoListInteractor(private val coinMarketCapRepository: CoinMarketCapRepository) : CryptoListUseCase {
 
-    val liveData = MutableLiveData<InteractorResponse>()
-    var callback: ((InteractorResponse?) -> Unit)? = null
+    val pageLiveData = MutableLiveData<Int>()
+    val repositoryLiveData: LiveData<ApiResponse<List<Crypto>>>
+    val interactorLiveData: LiveData<InteractorResponse>
 
-    override fun observe(callback: (InteractorResponse?) -> Unit) {
-        this.callback = callback
-        liveData.observeForever{ response -> callback(response) }
+    init {
+        repositoryLiveData = Transformations.switchMap(pageLiveData, this::getCryptoList)
+        interactorLiveData = Transformations.map(repositoryLiveData, this::mapApiResponse)
     }
 
-    override fun clear() {
-        callback?.let { liveData.removeObserver(it) }
+    override fun getCryptoListBy(page: Int): LiveData<InteractorResponse> {
+        pageLiveData.value = page
+        return interactorLiveData
     }
 
-    override fun getCryptoListBy(page: Int) {
-        async(UI) {
-            try {
-                val response = coinMarketCapRepository.getCryptoList(page, LIMIT_CRYPTO_LIST).await()
-                if (response.isSuccessful) {
-                    val responseBody = response.body()
-                    val cryptoList = responseBody?.let {
-                        it.filter { it.id != null && it.name != null }
-                                .map(cryptoViewModelMapper)
-                    } ?: emptyList()
-                    liveData.value = InteractorResponse(cryptoList, true)
-                } else {
-                    liveData.value = InteractorResponse(emptyList(), false, response.errorBody()?.string())
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+    private fun getCryptoList(page:Int) = coinMarketCapRepository.getCryptoList(page, LIMIT_CRYPTO_LIST)
+    private fun mapApiResponse(apiResponse: ApiResponse<List<Crypto>>) =
+        if (apiResponse.isSuccessful) {
+            val cryptoViewModelList = apiResponse.body?.let {
+                it.filter { it.id != null && it.name != null }
+                        .map(cryptoViewModelMapper)
+            } ?: emptyList()
+            InteractorResponse(cryptoViewModelList)
+        } else {
+            InteractorResponse(emptyList(), false, apiResponse.errorMessage)
         }
-
-    }
 
     private val cryptoViewModelMapper: (Crypto) -> CryptoViewModel = {
         crypto -> CryptoViewModel(
@@ -55,4 +49,4 @@ class CryptoListInteractor(private val coinMarketCapRepository: CoinMarketCapRep
     }
 }
 
-data class InteractorResponse(val data: List<CryptoViewModel>, val isSuccessful:Boolean, val errorMessage: String? = null)
+data class InteractorResponse(val data: List<CryptoViewModel>, val isSuccessful:Boolean = true, val errorMessage: String? = null)

@@ -1,14 +1,13 @@
 package com.antonicastejon.cryptodata.model
 
+import android.arch.lifecycle.LiveData
 import com.google.gson.annotations.SerializedName
-import kotlinx.coroutines.experimental.Deferred
-import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
 
 interface CoinMarketCapApi {
     @GET("v1/ticker/")
-    fun getCryptoList(@Query("start" )start:Int, @Query("limit") limit:Int) : Deferred<Response<List<Crypto>>>
+    fun getCryptoList(@Query("start" )start:Int, @Query("limit") limit:Int) : LiveData<ApiResponse<List<Crypto>>>
 }
 
 

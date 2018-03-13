@@ -1,7 +1,7 @@
 package com.antonicastejon.cryptodata.di
 
+import com.antonicastejon.cryptodata.common.LiveDataCallAdapterFactory
 import com.antonicastejon.cryptodata.model.CoinMarketCapApi
-import com.jakewharton.retrofit2.adapter.kotlin.coroutines.experimental.CoroutineCallAdapterFactory
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
@@ -21,7 +21,7 @@ class NetModule {
     fun providesRetrofit(okHttpClient: OkHttpClient) =
             Retrofit.Builder()
                     .baseUrl(BASE_URL)
-                    .addCallAdapterFactory(CoroutineCallAdapterFactory())
+                    .addCallAdapterFactory(LiveDataCallAdapterFactory())
                     .addConverterFactory(GsonConverterFactory.create())
                     .client(okHttpClient)
                     .build()

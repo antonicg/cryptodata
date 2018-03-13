@@ -88,7 +88,7 @@ class CryptoListFragment : Fragment() {
     }
 
     private fun initializeSwipeToRefreshView(view:View) {
-        view.swipeRefreshLayout.setOnRefreshListener { viewModel.resetCryptoList() }
+//        view.swipeRefreshLayout.setOnRefreshListener { viewModel.resetCryptoList() }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -100,7 +100,7 @@ class CryptoListFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
         observeViewModel()
         if (savedInstanceState == null) {
-            viewModel.updateCryptoList()
+            viewModel.requestCryptoList()
         }
     }
 
@@ -110,7 +110,7 @@ class CryptoListFragment : Fragment() {
 
     private fun loadNextPage() {
         cryptoListAdapter.addLoadingViewFooter()
-        viewModel.updateCryptoList()
+//        viewModel.updateCryptoList()
     }
 
 
