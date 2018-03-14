@@ -1,6 +1,6 @@
 package com.antonicastejon.cryptodata.presentation.main.crypto_list
 
-import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.Transformations
 import android.arch.lifecycle.ViewModel
 import com.antonicastejon.cryptodata.domain.CryptoListUseCase
@@ -12,36 +12,28 @@ private val TAG = CryptoListViewModel::class.java.name
 class CryptoListViewModel
 @Inject constructor(private val cryptoListUseCase: CryptoListUseCase) : ViewModel() {
 
-    private val pageLiveData = MutableLiveData<Int>()
-    private val interactorResponseLiveData = Transformations.switchMap(pageLiveData, this::getCryptoList)
-    val stateLiveData = Transformations.map(interactorResponseLiveData, this::getStateFromInteractorResponse)
+    val stateLiveData: LiveData<CryptoListState> = Transformations.switchMap(cryptoListUseCase.getLiveData(), ::getStateFromInteractorResponse)
 
-//    val observer: (InteractorResponse?) -> Unit = {
-//        it?.let {
-//            if (it.isSuccessful) {
-//                onCryptoListReceived(it.data)
-//            } else {
-//                onError(Throwable(it.errorMessage))
-//            }
-//        } ?: onError(Throwable("Unexpected"))
-//    }
-
-//    init {
-//        stateLiveData.value = DefaultState(0, false, emptyList())
-//    }
-
-    private fun getCryptoList(page:Int) = cryptoListUseCase.getCryptoListBy(page)
-
-    private fun getStateFromInteractorResponse(interactorResponse: InteractorResponse): CryptoListState {
-        return if (interactorResponse.isSuccessful) {
-            DefaultState(1, true, interactorResponse.data)
-        } else {
-            ErrorState(interactorResponse.errorMessage ?: "", 0, false, emptyList())
+    private fun getStateFromInteractorResponse(interactorResponse: InteractorResponse): LiveData<CryptoListState> {
+        return object: LiveData<CryptoListState>() {
+            override fun onActive() {
+                super.onActive()
+                val isSuccessful = interactorResponse.isSuccessful
+                val cryptoListState = if (isSuccessful) {
+                    DefaultState(1, true, interactorResponse.data)
+                } else {
+                    ErrorState(interactorResponse.errorMessage ?: "", 0, false, emptyList())
+                }
+                postValue(cryptoListState)
+            }
         }
     }
 
+    private fun getCryptoList(page:Int) = cryptoListUseCase.getCryptoListBy(page)
+
+
     fun requestCryptoList() {
-        pageLiveData.value = 1
+        getCryptoList(1)
     }
 
 //    override fun onCleared() {

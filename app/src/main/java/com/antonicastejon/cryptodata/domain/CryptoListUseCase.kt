@@ -5,7 +5,8 @@ import android.os.Parcel
 import android.os.Parcelable
 
 interface CryptoListUseCase {
-    fun getCryptoListBy(page: Int): LiveData<InteractorResponse>
+    fun getCryptoListBy(page: Int)
+    fun getLiveData(): LiveData<InteractorResponse>
 }
 
 val emptyCryptoViewModel = CryptoViewModel()

@@ -11,23 +11,31 @@ const val LIMIT_CRYPTO_LIST = 1800
 
 class CryptoListInteractor(private val coinMarketCapRepository: CoinMarketCapRepository) : CryptoListUseCase {
 
-    val pageLiveData = MutableLiveData<Int>()
-    val repositoryLiveData: LiveData<ApiResponse<List<Crypto>>>
-    val interactorLiveData: LiveData<InteractorResponse>
+    private val pageLiveData = MutableLiveData<Int>()
+    private val repositoryLiveData: LiveData<ApiResponse<List<Crypto>>> = Transformations.switchMap(pageLiveData, ::getCryptoList)
+    private val interactorLiveData: LiveData<InteractorResponse> = Transformations.switchMap(repositoryLiveData, ::switchMapInteractorResponse)
 
-    init {
-        repositoryLiveData = Transformations.switchMap(pageLiveData, this::getCryptoList)
-        interactorLiveData = Transformations.map(repositoryLiveData, this::mapApiResponse)
+    private fun switchMapInteractorResponse(response: ApiResponse<List<Crypto>>): LiveData<InteractorResponse> {
+        return object: LiveData<InteractorResponse>() {
+            override fun onActive() {
+                super.onActive()
+                val interactorResponse = mapApiResponse(response)
+                postValue(interactorResponse)
+            }
+        }
     }
 
-    override fun getCryptoListBy(page: Int): LiveData<InteractorResponse> {
+    private fun getCryptoList(page:Int): LiveData<ApiResponse<List<Crypto>>> {
+        return coinMarketCapRepository.getCryptoList(page, LIMIT_CRYPTO_LIST)
+    }
+    override fun getCryptoListBy(page: Int) {
         pageLiveData.value = page
-        return interactorLiveData
     }
 
-    private fun getCryptoList(page:Int) = coinMarketCapRepository.getCryptoList(page, LIMIT_CRYPTO_LIST)
-    private fun mapApiResponse(apiResponse: ApiResponse<List<Crypto>>) =
-        if (apiResponse.isSuccessful) {
+    override fun getLiveData() = interactorLiveData
+
+    private fun mapApiResponse(apiResponse: ApiResponse<List<Crypto>>): InteractorResponse {
+        return if (apiResponse.isSuccessful) {
             val cryptoViewModelList = apiResponse.body?.let {
                 it.filter { it.id != null && it.name != null }
                         .map(cryptoViewModelMapper)
@@ -36,6 +44,7 @@ class CryptoListInteractor(private val coinMarketCapRepository: CoinMarketCapRep
         } else {
             InteractorResponse(emptyList(), false, apiResponse.errorMessage)
         }
+    }
 
     private val cryptoViewModelMapper: (Crypto) -> CryptoViewModel = {
         crypto -> CryptoViewModel(
