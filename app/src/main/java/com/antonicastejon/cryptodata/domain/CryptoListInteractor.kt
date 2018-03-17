@@ -13,7 +13,13 @@ class CryptoListInteractor(private val coinMarketCapRepository: CoinMarketCapRep
 
     private val pageLiveData = MutableLiveData<Int>()
     private val repositoryLiveData: LiveData<ApiResponse<List<Crypto>>> = Transformations.switchMap(pageLiveData, ::getCryptoList)
-    private val interactorLiveData: LiveData<InteractorResponse> = Transformations.switchMap(repositoryLiveData, ::switchMapInteractorResponse)
+    private val interactorLiveData = Transformations.switchMap(repositoryLiveData, ::switchMapInteractorResponse)
+
+    override fun getCryptoListBy(page: Int) {
+        pageLiveData.value = page
+    }
+
+    override fun getLiveData() = interactorLiveData
 
     private fun switchMapInteractorResponse(response: ApiResponse<List<Crypto>>): LiveData<InteractorResponse> {
         return object: LiveData<InteractorResponse>() {
@@ -28,11 +34,6 @@ class CryptoListInteractor(private val coinMarketCapRepository: CoinMarketCapRep
     private fun getCryptoList(page:Int): LiveData<ApiResponse<List<Crypto>>> {
         return coinMarketCapRepository.getCryptoList(page, LIMIT_CRYPTO_LIST)
     }
-    override fun getCryptoListBy(page: Int) {
-        pageLiveData.value = page
-    }
-
-    override fun getLiveData() = interactorLiveData
 
     private fun mapApiResponse(apiResponse: ApiResponse<List<Crypto>>): InteractorResponse {
         return if (apiResponse.isSuccessful) {

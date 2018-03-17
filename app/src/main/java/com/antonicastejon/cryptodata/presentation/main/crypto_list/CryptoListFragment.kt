@@ -11,9 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.antonicastejon.cryptodata.R
-import com.antonicastejon.cryptodata.domain.LIMIT_CRYPTO_LIST
 import com.antonicastejon.cryptodata.presentation.common.CryptoListRecyclerAdapter
-import com.antonicastejon.cryptodata.presentation.widgets.paginatedRecyclerView.PaginationScrollListener
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.crypto_list_fragment.*
 import kotlinx.android.synthetic.main.crypto_list_fragment.view.*
@@ -33,27 +31,15 @@ class CryptoListFragment : Fragment() {
     private lateinit var viewModel: CryptoListViewModel
 
     private val cryptoListAdapter by lazy { CryptoListRecyclerAdapter() }
-    private var isLoading = false
-    private var isLastPage = false
 
     private val stateObserver = Observer<CryptoListState> { state ->
         state?.let {
-            isLastPage = state.loadedAllItems
             when (state) {
                 is DefaultState -> {
-                    isLoading = false
                     swipeRefreshLayout.isRefreshing = false
                     cryptoListAdapter.updateData(it.data)
                 }
-                is LoadingState -> {
-                    swipeRefreshLayout.isRefreshing = true
-                    isLoading = true
-                }
-                is PaginatingState -> {
-                    isLoading = true
-                }
                 is ErrorState -> {
-                    isLoading = false
                     swipeRefreshLayout.isRefreshing = false
                     cryptoListAdapter.removeLoadingViewFooter()
                 }
@@ -83,12 +69,11 @@ class CryptoListFragment : Fragment() {
         view.recyclerView.apply {
             layoutManager = linearLayoutManager
             adapter = cryptoListAdapter
-            addOnScrollListener(OnScrollListener(linearLayoutManager))
         }
     }
 
     private fun initializeSwipeToRefreshView(view:View) {
-//        view.swipeRefreshLayout.setOnRefreshListener { viewModel.resetCryptoList() }
+        view.swipeRefreshLayout.setOnRefreshListener { requestCryptoListToViewModel() }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -100,7 +85,7 @@ class CryptoListFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
         observeViewModel()
         if (savedInstanceState == null) {
-            viewModel.requestCryptoList()
+            requestCryptoListToViewModel()
         }
     }
 
@@ -108,16 +93,8 @@ class CryptoListFragment : Fragment() {
         viewModel.stateLiveData.observe(this, stateObserver)
     }
 
-    private fun loadNextPage() {
-        cryptoListAdapter.addLoadingViewFooter()
-//        viewModel.updateCryptoList()
-    }
-
-
-    inner class OnScrollListener(layoutManager: LinearLayoutManager) : PaginationScrollListener(layoutManager) {
-        override fun isLoading() = isLoading
-        override fun loadMoreItems() = loadNextPage()
-        override fun getTotalPageCount() = LIMIT_CRYPTO_LIST
-        override fun isLastPage() = isLastPage
+    private fun requestCryptoListToViewModel() {
+        swipeRefreshLayout.isRefreshing = true
+        viewModel.requestCryptoList()
     }
 }
